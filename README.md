@@ -18,7 +18,12 @@ make composer c='require api'
 make composer c='require symfony/maker-bundle --dev'
 make composer c='require lexik/jwt-authentication-bundle'
 make sf c='lexik:jwt:generate-keypair'
+make composer c="require --dev foundry orm-fixtures"
+make composer c="require --dev symfony/test-pack symfony/http-client"
+make composer c="require --dev dama/doctrine-test-bundle"
+
 
 make sf c=make:user
+make sf c=make:test
 
 ```
