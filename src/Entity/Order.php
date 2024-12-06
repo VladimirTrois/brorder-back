@@ -39,7 +39,6 @@ use Symfony\Component\Validator\Constraints as Assert;
         new GetCollection(normalizationContext: ['groups' => ['order:collection:read']]),
         new Get(normalizationContext: ['groups' => ['order:collection:read', 'order:read']]),
         new Post(normalizationContext: ['groups' => ['order:collection:read', 'order:read']]),
-        new Put(),
         new Patch(),
         new Delete(),
     ],

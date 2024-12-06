@@ -9,14 +9,14 @@ class UserTest extends AbstractTest
 {
     public const URL_USER = self::URL_BASE . "/api/users";
 
-    public function testAdminResource()
+    public function testUserAdminLogin()
     {
         $response = $this->createClientWithCredentials()
             ->request('GET', self::URL_USER);
         $this->assertResponseIsSuccessful();
     }
 
-    public function testLoginAsUser()
+    public function testUserLogin()
     {
         UserFactory::createOne(
             [
@@ -68,5 +68,18 @@ class UserTest extends AbstractTest
         ]);
         $this->assertMatchesRegularExpression('~^/api/users/\d+$~', $response->toArray()['@id']);
         $this->assertMatchesResourceItemJsonSchema(User::class);
+    }
+
+    public function testPatchToUpdateUser(): void
+    {
+        $user = UserFactory::createOne();
+
+        $response = static::createClientWithCredentials()->request('PATCH', self::URL_USER . "/" . $user->getId(), [
+            'headers' => ['Content-Type' => 'application/merge-patch+json'],
+            'json' => [
+                'username' => 'changeg',
+            ],
+        ]);
+        $this->assertResponseStatusCodeSame(200);
     }
 }

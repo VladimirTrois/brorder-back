@@ -13,7 +13,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
-#[GetCollection()]
+#[GetCollection()] //Declared alone so it is public
 #[ApiResource(
     normalizationContext: [
         'groups' => ['product:collection:read'],
@@ -28,21 +28,21 @@ class Product
     #[ORM\Column]
     private ?int $id;
 
-    #[ORM\Column(length: 255,nullable: false, unique: true)]
-    #[Groups(['product:collection:read','order:read','order:collection:read'])]
+    #[ORM\Column(length: 255, nullable: false, unique: true)]
+    #[Groups(['product:collection:read', 'order:read', 'order:collection:read'])]
     #[ApiFilter(SearchFilter::class, strategy: 'partial')]
     #[Assert\NotBlank]
     #[Assert\Length(min: 2, max: 30, maxMessage: 'Name your product with 30 chars or less')]
     private ?string $name;
 
     #[ORM\Column(nullable: false)]
-    #[Groups(['product:collection:read','order:read','order:collection:read'])]
+    #[Groups(['product:collection:read', 'order:read', 'order:collection:read'])]
     #[Assert\NotBlank]
     #[Assert\GreaterThanOrEqual(0)]
     private ?int $price = 0;
 
     #[ORM\Column(nullable: false)]
-    #[Groups(['product:collection:read','order:read'])]
+    #[Groups(['product:collection:read', 'order:read'])]
     #[Assert\NotBlank]
     #[Assert\GreaterThanOrEqual(0)]
     private ?int $weight;
