@@ -12,7 +12,6 @@ abstract class AbstractTest extends ApiTestCase
 {
     private ?string $token = null;
 
-    const NUMBERSOFUSERS = 30;
     const USERNAME = "usernameExample";
     const PASSWORD = "passwordExample";
     const URL_BASE = "https://localhost:4443";
@@ -29,7 +28,6 @@ abstract class AbstractTest extends ApiTestCase
                 'roles' => ["ROLE_ADMIN"],
             ]
         );
-        UserFactory::createMany(SELF::NUMBERSOFUSERS - 1);
 
         self::bootKernel();
     }

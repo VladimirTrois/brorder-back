@@ -23,12 +23,12 @@ make composer c="require --dev symfony/test-pack symfony/http-client"
 make composer c="require --dev dama/doctrine-test-bundle"
 make composer c="require --dev justinrainbow/json-schema"
 make composer c="require symfony/serializer-pack"
+//For HashPassword
+make sf c="make:state-processor"
 
 make sf c=make:user
 make sf c=make:test
 
-//For HashPassword
-make sf c="make:state-processor"
 ```
 
 To run tests

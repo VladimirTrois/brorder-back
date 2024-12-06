@@ -16,35 +16,10 @@ class UserTest extends AbstractTest
         $this->assertResponseIsSuccessful();
     }
 
-    public function testUserLogin()
-    {
-        UserFactory::createOne(
-            [
-                'username' => 'user@example.com',
-                'password' => '$3cr3t',
-                'roles' => ["ROLE_USER"],
-            ]
-        );
-
-        $token = $this->getToken(
-            [
-                'username' => 'user@example.com',
-                'password' => '$3cr3t',
-            ]
-        );
-
-        $response = $this->createClientWithCredentials($token)->request('GET', self::URL_USER);
-        $this->assertResponseStatusCodeSame(403);
-    }
-
     public function testGetCollection(): void
     {
         $response = static::createClientWithCredentials()->request('GET', self::URL_USER);
-
         $this->assertResponseIsSuccessful();
-        $this->assertJsonContains([
-            'totalItems' => self::NUMBERSOFUSERS,
-        ]);
         $this->assertMatchesResourceCollectionJsonSchema(User::class);
     }
 

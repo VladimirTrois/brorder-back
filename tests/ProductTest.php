@@ -2,20 +2,14 @@
 
 namespace App\Tests;
 
-use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use App\Entity\Product;
 use App\Factory\ProductFactory;
-use Zenstruck\Foundry\Test\Factories;
-use Zenstruck\Foundry\Test\ResetDatabase;
 
 const URL = 'https://localhost:4443/api/products';
 const NUMBERSOFPRODUCTS = 30;
 
-class ProductTest extends ApiTestCase
+class ProductTest extends AbstractTest
 {
-    use ResetDatabase, Factories;
-
-    
     public function testGetProductCollection(): void
     {
         ProductFactory::createMany(NUMBERSOFPRODUCTS);
@@ -26,8 +20,7 @@ class ProductTest extends ApiTestCase
 
         // For collections
         $this->assertMatchesResourceCollectionJsonSchema(Product::class);
-        $this->assertJsonContains(["totalItems"=> NUMBERSOFPRODUCTS]);
-
+        $this->assertJsonContains(["totalItems" => NUMBERSOFPRODUCTS]);
     }
 
     public function testProductNoAdmin(): void
