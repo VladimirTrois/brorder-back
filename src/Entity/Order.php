@@ -7,30 +7,32 @@ use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
-use App\Repository\OrderRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
-use Doctrine\DBAL\Types\Types;
-use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Serializer\Annotation\Groups;
-use Symfony\Component\Validator\Constraints as Assert;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
+use App\Repository\OrderRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
+use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Serializer\Annotation\Context;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
-use Symfony\Component\Form\Extension\Core\Type\DateType;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: OrderRepository::class)]
 #[ORM\Table(name: '`order`')]
-#[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_NAME_PITCH_PICKUPDATE', fields: ['name','pitch','pickUpDate'])]
+#[ORM\UniqueConstraint(
+    name: 'UNIQ_IDENTIFIER_NAME_PITCH_PICKUPDATE',
+    fields: ['name', 'pitch', 'pickUpDate']
+)]
 #[UniqueEntity(
-    fields:['name', 'pitch','pickUpDate'],
-    message:"The group (Name, Pitch and pickUpdate) are already used"
-    )]
+    fields: ['name', 'pitch', 'pickUpDate'],
+    message: "The group (Name, Pitch and pickUpdate) are already used"
+)]
 #[ApiResource(
     paginationItemsPerPage: 10,
     operations: [
@@ -58,20 +60,20 @@ class Order
     private ?int $id;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['order:collection:read','order:write'])]
+    #[Groups(['order:collection:read', 'order:write'])]
     #[Assert\NotBlank()]
     #[Assert\Length(min: 2, max: 30, maxMessage: 'Please use a name with 30 chars or less')]
     #[ApiFilter(SearchFilter::class, strategy: 'partial')]
     private ?string $name;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['order:collection:read','order:write'])]
+    #[Groups(['order:collection:read', 'order:write'])]
     #[Assert\NotBlank()]
     #[ApiFilter(SearchFilter::class, strategy: 'partial')]
     private ?string $pitch;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Groups(['order:collection:read','order:write'])]
+    #[Groups(['order:collection:read', 'order:write'])]
     #[Context([DateTimeNormalizer::FORMAT_KEY => 'Y-m-d'])]
     // #[ApiFilter(DateFilter::class, strategy: DateFilter::EXCLUDE_NULL)]
     private \DateTimeInterface $pickUpDate;
@@ -93,12 +95,13 @@ class Order
     /**
      * @var Collection<int, OrderItems>
      */
-    #[ORM\OneToMany(targetEntity: OrderItems::class, mappedBy: 'order', orphanRemoval: true, cascade:['persist'])]
+    #[ORM\OneToMany(targetEntity: OrderItems::class, mappedBy: 'order', orphanRemoval: true, cascade: ['persist'])]
     #[Assert\Valid]
-    #[Groups(['order:collection:read','order:write'])]
+    #[Groups(['order:collection:read', 'order:write'])]
     private Collection $items;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->createdAt = new \DateTimeImmutable('now');
         $this->pickUpDate = new \DateTime('tomorrow');
         $this->items = new ArrayCollection();

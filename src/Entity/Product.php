@@ -6,17 +6,20 @@ use ApiPlatform\Doctrine\Orm\Filter\BooleanFilter;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\GetCollection;
 use App\Repository\ProductRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
+#[GetCollection()]
 #[ApiResource(
     normalizationContext: [
         'groups' => ['product:collection:read'],
     ],
-    paginationItemsPerPage: 10
+    paginationItemsPerPage: 10,
+    security: "is_granted('ROLE_ADMIN')"
 )]
 class Product
 {

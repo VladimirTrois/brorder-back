@@ -1,6 +1,8 @@
 security:
     # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
     password_hashers:
+        # auto hasher with default options for the User class (and children)
+        App\Entity\User: 'auto'
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
     # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
     providers:
@@ -13,16 +15,18 @@ security:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
-        main:
+        api:
+            pattern: ^/api/
             stateless: true
             provider: app_user_provider
+            jwt: ~
+        main:
             json_login:
                 check_path: auth # The name in routes.yaml is enough for mapping
                 username_path: username
                 password_path: password
                 success_handler: lexik_jwt_authentication.handler.authentication_success
                 failure_handler: lexik_jwt_authentication.handler.authentication_failure
-            jwt: ~
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
@@ -33,9 +37,9 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-        - { path: ^/api/products, roles: PUBLIC_ACCESS, methods:[GET] } # Allows accessing the Swagger UI docs
+        - { path: ^/api/products, roles: PUBLIC_ACCESS, methods:[GET] }
         - { path: ^/api/orders, roles: PUBLIC_ACCESS, methods:[POST] }
-        - { path: ^/admin/auth, roles: PUBLIC_ACCESS }
+        - { path: ^/auth, roles: PUBLIC_ACCESS } # Allows accessing the Swagger UI docs
         - { path: ^/api/docs, roles: PUBLIC_ACCESS }
         - { path: ^/, roles: ROLE_ADMIN }
 
