@@ -69,6 +69,8 @@ COPY --link frankenphp/conf.d/20-app.dev.ini $PHP_INI_DIR/app.conf.d/
 
 CMD [ "frankenphp", "run", "--config", "/etc/caddy/Caddyfile", "--watch" ]
 
+RUN git config --global --add safe.directory /app
+
 # Prod FrankenPHP image
 FROM frankenphp_base AS frankenphp_prod
 

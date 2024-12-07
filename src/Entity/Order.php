@@ -15,6 +15,7 @@ use ApiPlatform\Metadata\Put;
 use App\Repository\OrderRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\DateType;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -39,7 +40,7 @@ use Symfony\Component\Validator\Constraints as Assert;
         new GetCollection(normalizationContext: ['groups' => ['order:collection:read']]),
         new Get(normalizationContext: ['groups' => ['order:collection:read', 'order:read']]),
         new Post(normalizationContext: ['groups' => ['order:collection:read', 'order:read']]),
-        new Patch(),
+        new Patch(normalizationContext: ['groups' => ['order:collection:read', 'order:read']]),
         new Delete(),
     ],
     denormalizationContext: ['groups' => ['order:write']],
@@ -78,12 +79,12 @@ class Order
     private \DateTimeInterface $pickUpDate;
 
     #[ORM\Column]
-    #[Groups(['order:read'])]
+    #[Groups(['order:read', 'order:write'])]
     #[ApiFilter(BooleanFilter::class)]
     private ?bool $isTaken = false;
 
     #[ORM\Column]
-    #[Groups(['order:read'])]
+    #[Groups(['order:read', 'order:write'])]
     #[ApiFilter(BooleanFilter::class)]
     private ?bool $isDeleted = false;
 
@@ -95,7 +96,12 @@ class Order
      * @var Collection<int, OrderItems>
      */
     #[ORM\OneToMany(targetEntity: OrderItems::class, mappedBy: 'order', orphanRemoval: true, cascade: ['persist'])]
-    #[Assert\Valid]
+    #[Assert\Collection(
+        fields: [
+            'product' => new Assert\NotNull(),
+            'quantity' => new Assert\Positive()
+        ],
+    )]
     #[Groups(['order:collection:read', 'order:write'])]
     private Collection $items;
 
@@ -204,10 +210,5 @@ class Order
         }
 
         return $this;
-    }
-
-    public function getPickUpDateString(): string
-    {
-        return $this->pickUpDate->format('Y-m-d');
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Factory;
 
 use App\Entity\OrderItems;
+use App\Entity\Product;
 use Zenstruck\Foundry\Persistence\PersistentProxyObjectFactory;
 
 /**
@@ -15,9 +16,6 @@ final class OrderItemsFactory extends PersistentProxyObjectFactory
      *
      * @todo inject services if required
      */
-    public function __construct()
-    {
-    }
 
     public static function class(): string
     {

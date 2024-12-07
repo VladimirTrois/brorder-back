@@ -19,20 +19,21 @@ class OrderItems
     #[ORM\Column]
     private ?int $id;
 
-    #[ORM\ManyToOne(targetEntity:Order::class ,inversedBy: 'items')]
+    #[ORM\ManyToOne(targetEntity: Order::class, inversedBy: 'items')]
     #[ORM\JoinColumn(nullable: false)]
     #[Assert\NotBlank]
     private ?order $order;
 
-    #[ORM\ManyToOne(targetEntity:Product::class )]
+    #[ORM\ManyToOne(targetEntity: Product::class)]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['order:collection:read','order:write'])]
+    #[Groups(['order:collection:read', 'order:write'])]
     #[Assert\NotBlank]
+    #[Assert\Type(Product::class)]
     private ?product $product;
 
     #[ORM\Column]
-    #[Groups(['order:collection:read','order:write'])]
-    #[Assert\NotBlank,Assert\NotEqualTo(0)]
+    #[Groups(['order:collection:read', 'order:write'])]
+    #[Assert\Positive()]
     private ?int $quantity;
 
     public function getId(): ?int
