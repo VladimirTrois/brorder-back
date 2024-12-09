@@ -23,7 +23,7 @@ class AppFixturesRandom extends Fixture implements FixtureGroupInterface
         //Create admin for tests
         UserFactory::createOne([
             'username' => "admin",
-            'password' => 'test',
+            'password' => 'copain',
             'roles' => ["ROLE_ADMIN"],
         ]);
 

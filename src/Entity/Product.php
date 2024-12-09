@@ -7,6 +7,10 @@ use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Delete;
 use App\Repository\ProductRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -15,10 +19,15 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
 #[GetCollection()] //Declared alone so it is public
 #[ApiResource(
-    normalizationContext: [
-        'groups' => ['product:collection:read'],
-    ],
     paginationItemsPerPage: 10,
+    operations: [
+        new Get(),
+        new Post(),
+        new Patch(),
+        new Delete(),
+    ],
+    normalizationContext: ['groups' => ['product:read'],],
+    denormalizationContext: ['groups' => ['product:write']],
     security: "is_granted('ROLE_ADMIN')"
 )]
 class Product
@@ -29,30 +38,31 @@ class Product
     private ?int $id;
 
     #[ORM\Column(length: 255, nullable: false, unique: true)]
-    #[Groups(['product:collection:read', 'order:read', 'order:collection:read'])]
+    #[Groups(['product:read', 'product:write', 'order:read', 'order:collection:read'])]
     #[ApiFilter(SearchFilter::class, strategy: 'partial')]
     #[Assert\NotBlank]
     #[Assert\Length(min: 2, max: 30, maxMessage: 'Name your product with 30 chars or less')]
     private ?string $name;
 
     #[ORM\Column(nullable: false)]
-    #[Groups(['product:collection:read', 'order:read', 'order:collection:read'])]
+    #[Groups(['product:read', 'product:write', 'order:read', 'order:collection:read'])]
     #[Assert\NotBlank]
     #[Assert\GreaterThanOrEqual(0)]
     private ?int $price = 0;
 
     #[ORM\Column(nullable: false)]
-    #[Groups(['product:collection:read', 'order:read'])]
+    #[Groups(['product:read', 'product:write', 'order:read'])]
     #[Assert\NotBlank]
     #[Assert\GreaterThanOrEqual(0)]
     private ?int $weight;
 
     #[ORM\Column(nullable: false)]
     #[ApiFilter(BooleanFilter::class)]
+    #[Groups(['product:read', 'product:write'])]
     private ?bool $isAvailable = true;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['product:collection:read'])]
+    #[Groups(['product:read', 'product:write'])]
     private ?string $image = null;
 
     public function getId(): ?int

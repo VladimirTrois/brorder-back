@@ -34,16 +34,20 @@ use Symfony\Component\Validator\Constraints as Assert;
     fields: ['name', 'pitch', 'pickUpDate'],
     message: "The group (Name, Pitch and pickUpdate) are already used"
 )]
+#[Post(
+    normalizationContext: ['groups' => ['order:collection:read', 'order:read']],
+    denormalizationContext: ['groups' => ['order:write']],
+)] //Declared alone so it is public
 #[ApiResource(
     paginationItemsPerPage: 10,
     operations: [
         new GetCollection(normalizationContext: ['groups' => ['order:collection:read']]),
         new Get(normalizationContext: ['groups' => ['order:collection:read', 'order:read']]),
-        new Post(normalizationContext: ['groups' => ['order:collection:read', 'order:read']]),
         new Patch(normalizationContext: ['groups' => ['order:collection:read', 'order:read']]),
         new Delete(),
     ],
     denormalizationContext: ['groups' => ['order:write']],
+    security: "is_granted('ROLE_ADMIN')"
 )]
 // #[ApiResource(
 //     uriTemplate: '/orders/{date}',
@@ -96,12 +100,8 @@ class Order
      * @var Collection<int, OrderItems>
      */
     #[ORM\OneToMany(targetEntity: OrderItems::class, mappedBy: 'order', orphanRemoval: true, cascade: ['persist'])]
-    #[Assert\Collection(
-        fields: [
-            'product' => new Assert\NotNull(),
-            'quantity' => new Assert\Positive()
-        ],
-    )]
+    #[Assert\Count(min: 1, minMessage: "Items cannot be empty")]
+    #[Assert\Valid()]
     #[Groups(['order:collection:read', 'order:write'])]
     private Collection $items;
 

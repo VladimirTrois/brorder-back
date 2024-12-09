@@ -34,41 +34,63 @@ class OrderTest extends AbstractTest
         $this->assertResponseIsSuccessful();
     }
 
-    // public function testPOST(): void
-    // {
-    //     $product1 = ProductFactory::createOne();
-    //     $response1 = static::createClientWithCredentials()->request('GET', self::URL_BASE . "/api/products/" . $product1->getId());
-    //     $json = new stdClass();
-    //     $product2 = ProductFactory::createOne();
-    //     $response2 = static::createClientWithCredentials()->request('GET', self::URL_BASE . "/api/products/" . $product2->getId());
-    //     $json = new stdClass();
+    public function testPOST(): void
+    {
+        $product1 = ProductFactory::createOne();
+        $response1 = static::createClientWithCredentials()->request('GET', self::URL_BASE . "/api/products/" . $product1->getId());
+        $json = new stdClass();
+        $product2 = ProductFactory::createOne();
+        $response2 = static::createClientWithCredentials()->request('GET', self::URL_BASE . "/api/products/" . $product2->getId());
+        $json = new stdClass();
 
-    //     $response = static::createClientWithCredentials()->request('POST', self::URL_ORDER, [
-    //         'headers' => ['Content-Type' => 'application/ld+json'],
-    //         'json' => [
-    //             'name' => 'testOrder',
-    //             'pitch' => "A23",
-    //             'pickUpDate' => "2024-11-23",
-    //             'items' => [[
-    //                 "product" => 23,
-    //                 "quantity" => 2,
-    //             ]],
-    //         ],
-    //     ]);
+        $response = static::createClientWithCredentials()->request('POST', self::URL_ORDER, [
+            'headers' => ['Content-Type' => 'application/ld+json'],
+            'json' => [
+                'name' => 'testOrder',
+                'pitch' => "A23",
+                'pickUpDate' => "2024-11-23",
+                'items' => [
+                    0 => [
+                        "product" => $response1->toArray()['@id'],
+                        "quantity" => 2,
+                    ],
+                    1 => [
+                        "product" => $response2->toArray()['@id'],
+                        "quantity" => 4,
+                    ],
+                ],
+            ],
+        ]);
 
-    //     $this->assertResponseStatusCodeSame(201);
-    //     $this->assertResponseHeaderSame('content-type', 'application/ld+json; charset=utf-8');
-    //     $this->assertJsonContains([
-    //         '@context' => '/api/contexts/Product',
-    //         '@type' => 'Product',
-    //         'name' => 'productTest',
-    //         'price' => 3452,
-    //         'weight' => 234,
-    //         'image' => '/url/test',
-    //     ]);
-    //     $this->assertMatchesRegularExpression('~^/api/products/\d+$~', $response->toArray()['@id']);
-    //     $this->assertMatchesResourceItemJsonSchema(Order::class);
-    // }
+        $this->assertResponseStatusCodeSame(201);
+        $this->assertResponseHeaderSame('content-type', 'application/ld+json; charset=utf-8');
+        $this->assertJsonContains([
+            '@context' => '/api/contexts/Order',
+            '@type' => 'Order',
+            'name' => 'testOrder',
+            'pitch' => "A23",
+            'pickUpDate' => "2024-11-23",
+            'items' => [
+                0 => [
+                    '@type' => 'OrderItems',
+                    "product" => [
+                        '@id' => $response1->toArray()['@id'],
+                        "name" => $response1->toArray()['name'],
+                    ],
+                    "quantity" => 2,
+                ],
+                1 => [
+                    '@type' => 'OrderItems',
+                    "product" => [
+                        '@id' => $response2->toArray()['@id'],
+                        "name" => $response2->toArray()['name'],
+                    ],
+                    "quantity" => 4,
+                ],
+            ],
+        ]);
+        $this->assertMatchesRegularExpression('~^/api/orders/\d+$~', $response->toArray()['@id']);
+    }
 
     // public function testPATCH(): void
     // {

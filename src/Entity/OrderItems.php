@@ -21,7 +21,7 @@ class OrderItems
 
     #[ORM\ManyToOne(targetEntity: Order::class, inversedBy: 'items')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Assert\NotBlank]
+    #[Assert\NotNull]
     private ?order $order;
 
     #[ORM\ManyToOne(targetEntity: Product::class)]
