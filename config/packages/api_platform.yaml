@@ -1,5 +1,6 @@
 api_platform:
-    title: Hello API Platform
+    title: Brorder API
+    description: API to order bread. It manages creation of products to sell, order to make and users that will access an admin.
     version: 1.0.0
     defaults:
         stateless: true
