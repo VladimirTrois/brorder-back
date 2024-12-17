@@ -31,11 +31,11 @@ final class OrderFactory extends PersistentProxyObjectFactory
     protected function defaults(): array|callable
     {
         return [
-            'name' => self::faker()->text(30),
+            'name' => self::faker()->lastName(),
             'pitch' => self::faker()->randomLetter() . self::faker()->numberBetween(0, 1) . self::faker()->numberBetween(0, 9),
-            'pickUpDate' => self::faker()->dateTimeThisYear(),
-            'isDeleted' => self::faker()->boolean(70),
-            'isTaken' => self::faker()->boolean(),
+            'pickUpDate' => self::faker()->dateTimeBetween('-0 days', '+0 days'),
+            'isDeleted' => self::faker()->boolean(10),
+            'isTaken' => self::faker()->boolean(10),
         ];
     }
 
@@ -52,6 +52,43 @@ final class OrderFactory extends PersistentProxyObjectFactory
     final public static function createOrderWithItems(array $products, $numberOfOrders, $nbOfItemsPerOrderMax): array
     {
         $orders = self::createMany($numberOfOrders);
+
+        foreach ($orders as $order) {
+            $nbOfItems = rand(1, $nbOfItemsPerOrderMax);
+            $selectedKeys = array_rand($products, $nbOfItems);
+            if ($nbOfItems == 1) {
+                OrderItemsFactory::createOne(
+                    [
+                        'order' => $order,
+                        'product' => $products[$selectedKeys],
+                        'quantity' => rand(1, 10),
+
+                    ]
+                );
+            } else {
+                foreach ($selectedKeys as $key) {
+                    OrderItemsFactory::createOne(
+                        [
+                            'order' => $order,
+                            'product' => $products[$key],
+                            'quantity' => rand(1, 10),
+
+                        ]
+                    );
+                }
+            }
+        };
+        return $orders;
+    }
+
+    final public static function createOrderWithItemsForToday(array $products, $numberOfOrders, $nbOfItemsPerOrderMax): array
+    {
+        $orders = self::createMany(
+            $numberOfOrders,
+            static function (int $i) {
+                return ['pickUpDate' => self::faker()->dateTimeBetween('-1 days', '+1 days')];
+            }
+        );
 
         foreach ($orders as $order) {
             $nbOfItems = rand(1, $nbOfItemsPerOrderMax);

@@ -6,5 +6,9 @@ controllers:
 
 # api/config/routes.yaml
 auth:
-    path: /login
+    path: /api/login
+    methods: ["POST"]
+
+api_refresh_token:
+    path: /api/token/refresh
     methods: ["POST"]

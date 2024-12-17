@@ -69,6 +69,9 @@ createDB: sf
 migrateDB: c=doctrine:migrations:migrate
 migrateDB: sf 
 
+loadAll: c=doctrine:fixtures:load
+loadAll: sf 
+
 loadRandomDB: c=doctrine:fixtures:load --group=random
 loadRandomDB: sf 
 

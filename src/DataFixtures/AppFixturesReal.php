@@ -12,16 +12,18 @@ use App\Factory\OrderItemsFactory;
 use App\Factory\UserFactory;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
-use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface; 
+use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 
+const NUMBEROFORDERS = 200; //How many Orders to create
+const NUMBEROFITEMPERORDERMAX = 4; //How many Items per Order MAX to create 
 class AppFixturesReal extends Fixture implements FixtureGroupInterface
 {
     //Creates real fixtures
     public const REALPRODUCTS = [
-        ["Baguette",120,280,"/img/products/baguette.jpg"],
-        ["Tradition",140,280,"/img/products/tradition.png"],
-        ["Croissant",120,70,"/img/products/croissant.png"],
-        ["Pain au chocolat",120,90,"/img/products/painauchocolat.png"],
+        ["Baguette", 120, 280, "/img/products/baguette.jpg"],
+        ["Tradition", 140, 280, "/img/products/tradition.png"],
+        ["Croissant", 120, 70, "/img/products/croissant.png"],
+        ["Pain au chocolat", 120, 90, "/img/products/painauchocolat.png"],
 
     ];
 
@@ -32,21 +34,24 @@ class AppFixturesReal extends Fixture implements FixtureGroupInterface
                 'username' => "admin",
                 'password' => 'copain',
                 'roles' => ["ROLE_ADMIN"],
-                
+
             ]
         );
 
-        ProductFactory::createMany(
+        $products = ProductFactory::createMany(
             count(SELF::REALPRODUCTS),
-            static function(int $i) {
-                return[
-                    'name' => SELF::REALPRODUCTS[$i-1][0],
-                    'price' => SELF::REALPRODUCTS[$i-1][1],
-                    'weight' => SELF::REALPRODUCTS[$i-1][2],
-                    'image' => SELF::REALPRODUCTS[$i-1][3],
+            static function (int $i) {
+                return [
+                    'name' => SELF::REALPRODUCTS[$i - 1][0],
+                    'price' => SELF::REALPRODUCTS[$i - 1][1],
+                    'weight' => SELF::REALPRODUCTS[$i - 1][2],
+                    'image' => SELF::REALPRODUCTS[$i - 1][3],
                 ];
             }
         );
+
+        //Create orders with items
+        $orders = OrderFactory::createOrderWithItemsForToday($products, NUMBEROFORDERS, NUMBEROFITEMPERORDERMAX);
 
 
         // foreach(SELF::REALPRODUCTS as $realProduct) {
@@ -57,7 +62,6 @@ class AppFixturesReal extends Fixture implements FixtureGroupInterface
         //     ->setImage($realProduct[3]);
         //     $manager->persist($product);
         // }
-           
         $manager->flush();
     }
 

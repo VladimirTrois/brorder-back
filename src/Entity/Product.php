@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use ApiPlatform\Doctrine\Orm\Filter\BooleanFilter;
+use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
@@ -30,6 +31,7 @@ use Symfony\Component\Validator\Constraints as Assert;
     denormalizationContext: ['groups' => ['product:write']],
     security: "is_granted('ROLE_ADMIN')"
 )]
+#[ApiFilter(OrderFilter::class, properties: ['name'], arguments: ['orderParameterName' => 'orderBy'])]
 class Product
 {
     #[ORM\Id]
@@ -106,7 +108,7 @@ class Product
         return $this;
     }
 
-    public function isAvailable(): ?bool
+    public function getIsAvailable(): ?bool
     {
         return $this->isAvailable;
     }

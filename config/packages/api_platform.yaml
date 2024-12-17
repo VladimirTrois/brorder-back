@@ -6,6 +6,7 @@ api_platform:
         stateless: true
         cache_headers:
             vary: ['Content-Type', 'Authorization', 'Origin']
+        pagination_client_items_per_page: true
     swagger:
         api_keys:
             JWT:

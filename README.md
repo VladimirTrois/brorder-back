@@ -29,6 +29,9 @@ make sf c="make:state-processor"
 make sf c=make:user
 make sf c=make:test
 
+
+make composer c="require gesdinet/jwt-refresh-token-bundle"
+
 ```
 
 To run tests
@@ -36,4 +39,12 @@ To run tests
 ```
 make test //runs all test
 make test c="tests/ProductTest.php" //run only Product test
+```
+
+
+For certificates on dev with FEDORA
+```
+sudo dnf install ca-certificates
+sudo update-ca-trust
+docker cp $(docker compose ps -q php):/data/caddy/pki/authorities/local/root.crt /etc/pki/ca-trust/source/root.crt && sudo update-ca-trust
 ```

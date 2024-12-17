@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use ApiPlatform\Doctrine\Orm\Filter\BooleanFilter;
+use ApiPlatform\Doctrine\Orm\Filter\DateFilter;
+use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
@@ -55,12 +57,14 @@ use Symfony\Component\Validator\Constraints as Assert;
 //     operations:[new GetCollection()],
 //     uriVariables: ['date' => new Link(fromClass: Order::class, toProperty: 'pickUpDate')],
 // )]
+#[ApiResource(order: ['isTaken' => 'asc'])]
+#[ApiFilter(OrderFilter::class, properties: ['isTaken', 'name', 'pitch'], arguments: ['orderParameterName' => 'orderBy'])]
 class Order
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['order:read'])]
+    #[Groups(['order:collection:read'])]
     private ?int $id;
 
     #[ORM\Column(length: 255)]
@@ -79,16 +83,16 @@ class Order
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Groups(['order:collection:read', 'order:write'])]
     #[Context([DateTimeNormalizer::FORMAT_KEY => 'Y-m-d'])]
-    // #[ApiFilter(DateFilter::class, strategy: DateFilter::EXCLUDE_NULL)]
+    #[ApiFilter(DateFilter::class, strategy: DateFilter::EXCLUDE_NULL)]
     private \DateTimeInterface $pickUpDate;
 
     #[ORM\Column]
-    #[Groups(['order:read', 'order:write'])]
+    #[Groups(['order:collection:read', 'order:write'])]
     #[ApiFilter(BooleanFilter::class)]
     private ?bool $isTaken = false;
 
     #[ORM\Column]
-    #[Groups(['order:read', 'order:write'])]
+    #[Groups(['order:collection:read', 'order:write'])]
     #[ApiFilter(BooleanFilter::class)]
     private ?bool $isDeleted = false;
 
