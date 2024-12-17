@@ -14,10 +14,12 @@ use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 
-const NUMBEROFORDERS = 200; //How many Orders to create
-const NUMBEROFITEMPERORDERMAX = 4; //How many Items per Order MAX to create 
 class AppFixturesReal extends Fixture implements FixtureGroupInterface
 {
+
+    const NUMBEROFORDERS = 200; //How many Orders to create
+    const NUMBEROFITEMPERORDERMAX = 4; //How many Items per Order MAX to create 
+
     //Creates real fixtures
     public const REALPRODUCTS = [
         ["Baguette", 120, 280, "/img/products/baguette.jpg"],
@@ -51,7 +53,7 @@ class AppFixturesReal extends Fixture implements FixtureGroupInterface
         );
 
         //Create orders with items
-        $orders = OrderFactory::createOrderWithItemsForToday($products, NUMBEROFORDERS, NUMBEROFITEMPERORDERMAX);
+        $orders = OrderFactory::createOrderWithItemsForToday($products, self::NUMBEROFORDERS, self::NUMBEROFITEMPERORDERMAX);
 
 
         // foreach(SELF::REALPRODUCTS as $realProduct) {

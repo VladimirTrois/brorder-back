@@ -9,22 +9,22 @@ use App\Factory\OrderItemsFactory;
 use App\Factory\ProductFactory;
 use stdClass;
 
-const NUMBEROFORDERS = 15;
-const NUMBEROFPRODUCTS = 10;
-const NUMBEROFITEMPERORDERMAX = 3;
 
 class OrderTest extends AbstractTest
 {
-    public const URL_ORDER = self::URL_BASE . "/api/orders";
+    const NUMBEROFORDERS = 15;
+    const NUMBEROFPRODUCTS = 10;
+    const NUMBEROFITEMPERORDERMAX = 3;
+    public const URL_ORDER = self::URL_BASE . "/orders";
 
     public function testGetCollection(): void
     {
-        OrderFactory::createMany(NUMBEROFORDERS);
+        OrderFactory::createMany(self::NUMBEROFORDERS);
 
         $response = static::createClientWithCredentials()->request('GET', self::URL_ORDER);
 
         $this->assertResponseIsSuccessful();
-        $this->assertJsonContains(["totalItems" => NUMBEROFORDERS]);
+        $this->assertJsonContains(["totalItems" => self::NUMBEROFORDERS]);
     }
 
     public function testGET(): void
@@ -37,10 +37,10 @@ class OrderTest extends AbstractTest
     public function testPOST(): void
     {
         $product1 = ProductFactory::createOne();
-        $response1 = static::createClientWithCredentials()->request('GET', self::URL_BASE . "/api/products/" . $product1->getId());
+        $response1 = static::createClientWithCredentials()->request('GET', self::URL_BASE . "/products/" . $product1->getId());
         $json = new stdClass();
         $product2 = ProductFactory::createOne();
-        $response2 = static::createClientWithCredentials()->request('GET', self::URL_BASE . "/api/products/" . $product2->getId());
+        $response2 = static::createClientWithCredentials()->request('GET', self::URL_BASE . "/products/" . $product2->getId());
         $json = new stdClass();
 
         $response = static::createClientWithCredentials()->request('POST', self::URL_ORDER, [

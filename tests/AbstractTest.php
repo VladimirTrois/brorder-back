@@ -14,7 +14,7 @@ abstract class AbstractTest extends ApiTestCase
 
     const USERNAME = "usernameExample";
     const PASSWORD = "passwordExample";
-    const URL_BASE = "https://localhost:4443";
+    const URL_BASE = "http://localhost:8000/api";
     const URL_LOGIN = self::URL_BASE . "/login";
 
     use ResetDatabase, Factories;

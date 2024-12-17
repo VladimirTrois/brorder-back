@@ -8,7 +8,7 @@ use App\Factory\UserFactory;
 
 class UserTest extends AbstractTest
 {
-    public const URL_USER = self::URL_BASE . "/api/users";
+    public const URL_USER = self::URL_BASE . "/users";
 
     public function testAdminLogin()
     {

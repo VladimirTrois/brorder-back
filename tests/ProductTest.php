@@ -5,21 +5,21 @@ namespace App\Tests;
 use App\Entity\Product;
 use App\Factory\ProductFactory;
 
-const NUMBERSOFPRODUCTS = 30;
 
 class ProductTest extends AbstractTest
 {
-    public const URL_PRODUCT = self::URL_BASE . "/api/products";
+    const NUMBERSOFPRODUCTS = 30;
+    public const URL_PRODUCT = self::URL_BASE . "/products";
 
     public function testGetCollection(): void
     {
-        ProductFactory::createMany(NUMBERSOFPRODUCTS);
+        ProductFactory::createMany(self::NUMBERSOFPRODUCTS);
 
         $response = static::createClient()->request('GET', self::URL_PRODUCT);
 
         $this->assertResponseIsSuccessful();
         $this->assertMatchesResourceCollectionJsonSchema(Product::class);
-        $this->assertJsonContains(["totalItems" => NUMBERSOFPRODUCTS]);
+        $this->assertJsonContains(["totalItems" => self::NUMBERSOFPRODUCTS]);
     }
 
     public function testGET(): void
@@ -39,6 +39,7 @@ class ProductTest extends AbstractTest
                 'price' => 3452,
                 'weight' => 234,
                 'image' => '/url/test',
+                'stock' => 3
             ],
         ]);
 
@@ -51,6 +52,7 @@ class ProductTest extends AbstractTest
             'price' => 3452,
             'weight' => 234,
             'image' => '/url/test',
+            'stock' => 3
         ]);
         $this->assertMatchesRegularExpression('~^/api/products/\d+$~', $response->toArray()['@id']);
         $this->assertMatchesResourceItemJsonSchema(Product::class);
