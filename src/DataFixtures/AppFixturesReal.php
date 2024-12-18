@@ -17,8 +17,8 @@ use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 class AppFixturesReal extends Fixture implements FixtureGroupInterface
 {
 
-    const NUMBEROFORDERS = 200; //How many Orders to create
-    const NUMBEROFITEMPERORDERMAX = 4; //How many Items per Order MAX to create 
+    const NUMBEROFORDERS = 300; //How many Orders to create
+    const NUMBEROFITEMPERORDERMAX = 3; //How many Items per Order MAX to create 
 
     //Creates real fixtures
     public const REALPRODUCTS = [
@@ -48,22 +48,14 @@ class AppFixturesReal extends Fixture implements FixtureGroupInterface
                     'price' => SELF::REALPRODUCTS[$i - 1][1],
                     'weight' => SELF::REALPRODUCTS[$i - 1][2],
                     'image' => SELF::REALPRODUCTS[$i - 1][3],
+                    'stock' => 10,
+                    'isAvailable' => true,
                 ];
             }
         );
 
         //Create orders with items
         $orders = OrderFactory::createOrderWithItemsForToday($products, self::NUMBEROFORDERS, self::NUMBEROFITEMPERORDERMAX);
-
-
-        // foreach(SELF::REALPRODUCTS as $realProduct) {
-        //     $product = new Product();
-        //     $product->setName($realProduct[0])
-        //     ->setPrice($realProduct[1])
-        //     ->setWeight($realProduct[2])
-        //     ->setImage($realProduct[3]);
-        //     $manager->persist($product);
-        // }
         $manager->flush();
     }
 

@@ -86,6 +86,10 @@ class Order
     #[ApiFilter(DateFilter::class, strategy: DateFilter::EXCLUDE_NULL)]
     private \DateTimeInterface $pickUpDate;
 
+    #[ORM\Column(nullable: true)]
+    #[Groups(['order:collection:read', 'order:write'])]
+    private ?int $total = null;
+
     #[ORM\Column]
     #[Groups(['order:collection:read', 'order:write'])]
     #[ApiFilter(BooleanFilter::class)]
@@ -108,6 +112,7 @@ class Order
     #[Assert\Valid()]
     #[Groups(['order:collection:read', 'order:write'])]
     private Collection $items;
+
 
     public function __construct()
     {
@@ -212,6 +217,18 @@ class Order
                 $item->setOrder(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getTotal(): ?int
+    {
+        return $this->total;
+    }
+
+    public function setTotal(?int $total): static
+    {
+        $this->total = $total;
 
         return $this;
     }

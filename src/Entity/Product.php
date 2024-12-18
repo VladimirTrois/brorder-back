@@ -31,7 +31,7 @@ use Symfony\Component\Validator\Constraints as Assert;
     denormalizationContext: ['groups' => ['product:write']],
     security: "is_granted('ROLE_ADMIN')"
 )]
-#[ApiFilter(OrderFilter::class, properties: ['name', 'stock'], arguments: ['orderParameterName' => 'orderBy'])]
+#[ApiFilter(OrderFilter::class, properties: ['name', 'stock', 'isAvailable'], arguments: ['orderParameterName' => 'orderBy'])]
 class Product
 {
     #[ORM\Id]

@@ -54,6 +54,7 @@ final class OrderFactory extends PersistentProxyObjectFactory
         $orders = self::createMany($numberOfOrders);
 
         foreach ($orders as $order) {
+            $order->setTotal(0);
             $nbOfItems = rand(1, $nbOfItemsPerOrderMax);
             $selectedKeys = array_rand($products, $nbOfItems);
             if ($nbOfItems == 1) {
@@ -65,6 +66,7 @@ final class OrderFactory extends PersistentProxyObjectFactory
 
                     ]
                 );
+                $order->setTotal($order->getTotal() + $products[$selectedKeys]['price']);
             } else {
                 foreach ($selectedKeys as $key) {
                     OrderItemsFactory::createOne(
@@ -75,6 +77,7 @@ final class OrderFactory extends PersistentProxyObjectFactory
 
                         ]
                     );
+                    $order->setTotal($order->getTotal() + $products[$key]['price']);
                 }
             }
         };
@@ -91,29 +94,34 @@ final class OrderFactory extends PersistentProxyObjectFactory
         );
 
         foreach ($orders as $order) {
+            $total = 0;
             $nbOfItems = rand(1, $nbOfItemsPerOrderMax);
             $selectedKeys = array_rand($products, $nbOfItems);
             if ($nbOfItems == 1) {
+                $quantity = rand(1, 5);
                 OrderItemsFactory::createOne(
                     [
                         'order' => $order,
                         'product' => $products[$selectedKeys],
-                        'quantity' => rand(1, 10),
-
+                        'quantity' => $quantity,
                     ]
                 );
+                $total += $products[$selectedKeys]->getPrice() * $quantity;
             } else {
                 foreach ($selectedKeys as $key) {
+                    $quantity = rand(1, 5);
                     OrderItemsFactory::createOne(
                         [
                             'order' => $order,
                             'product' => $products[$key],
-                            'quantity' => rand(1, 10),
+                            'quantity' => $quantity,
 
                         ]
                     );
+                    $total += $products[$key]->getPrice() * $quantity;
                 }
             }
+            $order->setTotal($total);
         };
         return $orders;
     }
