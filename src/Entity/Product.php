@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use ApiPlatform\Doctrine\Orm\Filter\BooleanFilter;
 use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
+use ApiPlatform\Doctrine\Orm\Filter\RangeFilter;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Metadata\ApiResource;
@@ -68,6 +69,7 @@ class Product
     private ?string $image = null;
 
     #[ORM\Column(nullable: true)]
+    #[ApiFilter(SearchFilter::class)]
     #[Groups(['product:read', 'product:write'])]
     private ?int $stock = null;
 
