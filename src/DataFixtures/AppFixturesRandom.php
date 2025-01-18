@@ -2,9 +2,7 @@
 
 namespace App\DataFixtures;
 
-use App\Entity\Order;
 use App\Factory\OrderFactory;
-use App\Factory\OrderItemsFactory;
 use App\Factory\ProductFactory;
 use App\Factory\UserFactory;
 use Doctrine\Bundle\FixturesBundle\Fixture;

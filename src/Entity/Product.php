@@ -32,7 +32,7 @@ use Symfony\Component\Validator\Constraints as Assert;
     denormalizationContext: ['groups' => ['product:write']],
     security: "is_granted('ROLE_ADMIN')"
 )]
-#[ApiFilter(OrderFilter::class, properties: ['name', 'stock', 'isAvailable'], arguments: ['orderParameterName' => 'orderBy'])]
+#[ApiFilter(OrderFilter::class, properties: ['rank', 'isAvailable'], arguments: ['orderParameterName' => 'orderBy'])]
 class Product
 {
     #[ORM\Id]
@@ -72,6 +72,10 @@ class Product
     #[ApiFilter(SearchFilter::class)]
     #[Groups(['product:read', 'product:write'])]
     private ?int $stock = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Groups(['product:read', 'product:write'])]
+    private ?int $rank = null;
 
     public function getId(): ?int
     {
@@ -146,6 +150,18 @@ class Product
     public function setStock(?int $stock): static
     {
         $this->stock = $stock;
+
+        return $this;
+    }
+
+    public function getRank(): ?int
+    {
+        return $this->rank;
+    }
+
+    public function setRank(?int $rank): static
+    {
+        $this->rank = $rank;
 
         return $this;
     }
