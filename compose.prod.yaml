@@ -4,6 +4,11 @@ services:
     build:
       context: .
       target: frankenphp_prod
+    volumes:
+      - ./:/app
+      - /app/vendor
+    ports:
+      - "0.0.0.0:8000:80"  # Exposes it only on this server IP
     environment:
       APP_SECRET: ${APP_SECRET}
       MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
