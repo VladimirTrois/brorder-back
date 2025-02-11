@@ -38,6 +38,8 @@ ENV COMPOSER_ALLOW_SUPERUSER=1
 
 ENV PHP_INI_SCAN_DIR=":$PHP_INI_DIR/app.conf.d"
 
+RUN git config --global --add safe.directory /app
+
 ###> recipes ###
 ###> doctrine/doctrine-bundle ###
 RUN install-php-extensions pdo_pgsql
@@ -68,8 +70,6 @@ RUN set -eux; \
 COPY --link frankenphp/conf.d/20-app.dev.ini $PHP_INI_DIR/app.conf.d/
 
 CMD [ "frankenphp", "run", "--config", "/etc/caddy/Caddyfile", "--watch" ]
-
-RUN git config --global --add safe.directory /app
 
 # Prod FrankenPHP image
 FROM frankenphp_base AS frankenphp_prod

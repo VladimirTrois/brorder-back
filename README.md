@@ -52,6 +52,17 @@ docker cp $(docker compose ps -q php):/data/caddy/pki/authorities/local/root.crt
 
 ## For Prod :
 ```
+APP_ENV=prod \
+SERVER_NAME=:80 \
+APP_SECRET=ChangeMe \
+CADDY_MERCURE_JWT_SECRET=ChangeThisMercureHubJWTSecretKey \
+docker compose -f compose.yaml -f compose.prod.yaml build --no-cache
+
+
+
+APP_ENV=prod \
+SERVER_NAME=:80 \
+APP_SECRET=ChangeMe \
 CADDY_MERCURE_JWT_SECRET=ChangeThisMercureHubJWTSecretKey \
 docker compose -f compose.yaml -f compose.prod.yaml up -d --wait
 ```
