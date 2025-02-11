@@ -27,9 +27,9 @@ public/bundles/
 tests/
 var/
 vendor/
-docker/
 .editorconfig
 .env.*.local
 .env.local
 .env.local.php
 .env.test
+docker/
