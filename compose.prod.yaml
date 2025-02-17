@@ -6,9 +6,8 @@ services:
       target: frankenphp_prod
     volumes:
       - ./:/app
-      - /app/vendor
     ports:
-      - "0.0.0.0:8000:80"  # Exposes it only on this server IP
+      - "192.168.1.85:8000:80"  # Exposes it only on this server IP
     environment:
       APP_ENV: prod
       APP_SECRET: ${APP_SECRET}

@@ -36,16 +36,20 @@ use Symfony\Component\Validator\Constraints as Assert;
     fields: ['name', 'pitch', 'pickUpDate'],
     message: "The group (Name, Pitch and pickUpdate) are already used"
 )]
+//Declared alone so it is public
 #[Post(
     normalizationContext: ['groups' => ['order:collection:read', 'order:read']],
     denormalizationContext: ['groups' => ['order:write']],
-)] //Declared alone so it is public
+)]
+#[Patch(
+    normalizationContext: ['groups' => ['order:collection:read', 'order:read']],
+    denormalizationContext: ['groups' => ['order:write']],
+)]
 #[ApiResource(
     paginationItemsPerPage: 10,
     operations: [
         new GetCollection(normalizationContext: ['groups' => ['order:collection:read']]),
         new Get(normalizationContext: ['groups' => ['order:collection:read', 'order:read']]),
-        new Patch(normalizationContext: ['groups' => ['order:collection:read', 'order:read']]),
         new Delete(),
     ],
     denormalizationContext: ['groups' => ['order:write']],
