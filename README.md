@@ -23,19 +23,15 @@ make composer c="require --dev symfony/test-pack symfony/http-client"
 make composer c="require --dev dama/doctrine-test-bundle"
 make composer c="require --dev justinrainbow/json-schema"
 make composer c="require symfony/serializer-pack"
+make composer c="require gesdinet/jwt-refresh-token-bundle"
 //For HashPassword
 make sf c="make:state-processor"
 
 make sf c=make:user
 make sf c=make:test
-
-
-make composer c="require gesdinet/jwt-refresh-token-bundle"
-
 ```
 
 To run tests
-
 ```
 make test //runs all test
 make test c="tests/ProductTest.php" //run only Product test
@@ -51,22 +47,24 @@ docker cp $(docker compose ps -q php):/data/caddy/pki/authorities/local/root.crt
 
 
 ## For Prod :
+
+To build
 ```
 APP_ENV=prod \
-SERVER_NAME=:80 \
 APP_SECRET=ChangeMe \
 CADDY_MERCURE_JWT_SECRET=ChangeThisMercureHubJWTSecretKey \
 docker compose -f compose.yaml -f compose.prod.yaml build --no-cache
+```
 
-
-
+To run
+```
 APP_ENV=prod \
-SERVER_NAME=:80 \
 APP_SECRET=ChangeMe \
 CADDY_MERCURE_JWT_SECRET=ChangeThisMercureHubJWTSecretKey \
 docker compose -f compose.yaml -f compose.prod.yaml up -d --wait
 ```
 
+All must have composer packages
 ```
 make composer c='req symfony/orm-pack'
 make composer c='require api'
@@ -74,7 +72,12 @@ make composer c='require lexik/jwt-authentication-bundle'
 make composer c='require symfony/serializer-pack'
 make composer c='require gesdinet/jwt-refresh-token-bundle'
 ```
- 
+
+On first time run
+```
+make sf c='lexik:jwt:generate-keypair'
+```
+
 ## Checklist:
 ```
 ##Step 1: Check Running Containers
@@ -97,9 +100,61 @@ docker compose exec -it php bin/console doctrine:query:sql "SELECT 1"
 ##Step 6: Check Caddy & Mercure
 docker compose logs php | grep caddy
 ```
- 
-api.brorder.campingdesplages.com
 
-curl -X 'GET' \
-  'http://localhost:8000/api/products?page=1&itemsPerPage=30&orderBy%5Brank%5D=asc&orderBy%5BisAvailable%5D=asc' \
+## To debug
+
+### Php container
+```
+make bash ## connects to php container
+```
+Once on the php container 
+```
+##Verify env variables
+env
+
+##Verify if app works inside container
+curl -X GET 'http://localhost:80/api/products' -H 'accept: application/ld+json'
+```
+
+### Database
+```
+docker compose exec -it database bash
+
+psql -U app -d brorder
+
+SELECT * FROM product LIMIT 10;
+SELECT * FROM user LIMIT 10;
+SELECT * FROM refresh_tokens LIMIT 10;
+
+\du ## List users
+
+```
+
+### From the server
+```
+curl -X 'GET' 'http://192.168.220.1:8800/api/products' \
   -H 'accept: application/ld+json'
+
+curl -X GET 'https://pain.campingdesplages.com/api/products' -H 'accept: application/ld+json'
+```
+
+### Users
+```
+curl -X 'POST' \
+  'http://192.168.1.85:8000/api/users' \
+  -H 'accept: application/ld+json' \
+  -H 'Authorization: Bearer token' \
+  -H 'Content-Type: application/ld+json' \
+  -d '{
+  "username": "test",
+  "roles": [
+    "USER"
+  ],
+  "password": "password"
+}'
+
+curl -X 'DELETE' \
+  'http://192.168.1.85:8000/api/users/{id}' \
+  -H 'accept: */*' \
+  -H 'Authorization: Bearer token'
+```
