@@ -17,10 +17,11 @@ class AppFixturesReal extends Fixture implements FixtureGroupInterface
 
     //Creates real fixtures
     public const REALPRODUCTS = [
-        ["Baguette", 120, 280, "/img/products/baguette.jpg", 1],
-        ["Tradition", 140, 280, "/img/products/tradition.png", 2],
-        ["Croissant", 120, 70, "/img/products/croissant.png", 3],
-        ["Pain au chocolat", 120, 90, "/img/products/painauchocolat.png", 4],
+        ["Baguette", 120, 280, "baguette.jpg", 1],
+        ["Tradition", 140, 280, "tradition.png", 2],
+        ["Croissant", 120, 70, "croissant.png", 3],
+        ["Pain au chocolat", 120, 90, "painauchocolat.png", 4],
+        ["Pavé Céréales", 120, 90, "pavecereales.png", 2],
 
     ];
 
