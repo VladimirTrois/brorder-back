@@ -29,8 +29,8 @@ class AppFixturesReal extends Fixture implements FixtureGroupInterface
     {
         UserFactory::createOne(
             [
-                'username' => "admin",
-                'password' => 'copain',
+                'username' => "user",
+                'password' => 'password',
                 'roles' => ["ROLE_ADMIN"],
 
             ]
