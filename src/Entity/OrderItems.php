@@ -17,6 +17,7 @@ class OrderItems
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['order:collection:read', 'order:write'])]
     private ?int $id;
 
     #[ORM\ManyToOne(targetEntity: Order::class, inversedBy: 'items')]

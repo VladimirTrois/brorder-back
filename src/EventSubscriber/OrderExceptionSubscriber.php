@@ -4,7 +4,7 @@
 
 namespace App\EventSubscriber;
 
-use ApiPlatform\Core\EventListener\EventPriorities;
+use ApiPlatform\Symfony\EventListener\EventPriorities;
 use ApiPlatform\Validator\Exception\ValidationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -12,6 +12,7 @@ use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Entity\Order;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\HttpKernel\KernelEvents;
 
 class OrderExceptionSubscriber implements EventSubscriberInterface
 {
@@ -30,7 +31,7 @@ class OrderExceptionSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            'kernel.exception' => 'onKernelException',
+            KernelEvents::EXCEPTION => ['onKernelException', EventPriorities::POST_RESPOND],
         ];
     }
 

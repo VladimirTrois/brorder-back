@@ -55,12 +55,6 @@ use Symfony\Component\Validator\Constraints as Assert;
     denormalizationContext: ['groups' => ['order:write']],
     security: "is_granted('ROLE_ADMIN')"
 )]
-// #[ApiResource(
-//     uriTemplate: '/orders/{date}',
-//     shortName: 'DateOrders',
-//     operations:[new GetCollection()],
-//     uriVariables: ['date' => new Link(fromClass: Order::class, toProperty: 'pickUpDate')],
-// )]
 #[ApiResource(order: ['isTaken' => 'asc'])]
 #[ApiFilter(OrderFilter::class, properties: ['isTaken', 'name', 'pitch'], arguments: ['orderParameterName' => 'orderBy'])]
 class Order
