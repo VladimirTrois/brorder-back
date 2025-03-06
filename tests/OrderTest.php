@@ -2,10 +2,7 @@
 
 namespace App\Tests;
 
-use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
-use App\Entity\Order;
 use App\Factory\OrderFactory;
-use App\Factory\OrderItemsFactory;
 use App\Factory\ProductFactory;
 use stdClass;
 

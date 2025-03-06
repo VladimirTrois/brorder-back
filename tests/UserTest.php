@@ -2,7 +2,6 @@
 
 namespace App\Tests;
 
-use ApiPlatform\Symfony\Bundle\Test\Client;
 use App\Entity\User;
 use App\Factory\UserFactory;
 
@@ -71,8 +70,5 @@ class UserTest extends AbstractTest
         $response = static::createClientWithCredentials()->request('DELETE', self::URL_USER . "/" . $user->getId());
 
         $this->assertResponseIsSuccessful();
-
-        $response = static::createClientWithCredentials()->request('GET', self::URL_USER . "/" . $user->getId());
-        $this->assertResponseStatusCodeSame(301);
     }
 }

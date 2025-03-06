@@ -9,9 +9,7 @@ use ApiPlatform\State\ProcessorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Order;
 use App\Entity\OrderItems;
-use App\Entity\Product;
 use Symfony\Component\DependencyInjection\Attribute\AsDecorator;
-use Symfony\Component\HttpFoundation\Request;
 
 #[AsDecorator('api_platform.doctrine.orm.state.persist_processor')]
 class OrderStockProcessor implements ProcessorInterface
@@ -20,38 +18,21 @@ class OrderStockProcessor implements ProcessorInterface
 
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): mixed
     {
-        $requestContent = $context['request']->getContent();
-        $previousData = $context['previous_data'];
-
-        if ($data instanceof Order) {
-            if ($operation instanceof Post) {
-
-                //Update new items quantity to stock
-                foreach ($data->getItems() as $orderItem) {
-                    $product = $orderItem->getProduct();
-                    $quantity = $orderItem->getQuantity();
-
-                    // Check stock before reducing
-                    if ($product->getStock() >= $quantity) {
-                        $product->setStock($product->getStock() - $quantity);
-                    } else {
-                        throw new \Exception('Not enough stock available');
-                    }
-
-                    $this->entityManager->persist($product);
-                }
-            } elseif ($operation instanceof Patch && (str_contains($requestContent, 'items') || str_contains($requestContent, 'isDeleted'))) {
+        if ($data instanceof Order && ($operation instanceof Post || $operation instanceof Patch)) {
+            $requestContent = $context['request']->getContent();
+            if ((str_contains($requestContent, 'items') || str_contains($requestContent, 'isDeleted'))) {
+                //If Order is being deleted 
                 if ($data->getIsDeleted()) {
-                    //Order is deleted so quantity is back to stock
+                    //Quantity is back to stock
                     foreach ($data->getItems() as $orderItem) {
                         $product = $orderItem->getProduct();
                         $product->setStock($product->getStock() + $orderItem->getQuantity());
                     }
                 } else {
 
-                    //Only revert if previous order was not deleted
-                    if (!$previousData->getIsDeleted()) {
-                        //Revert previous items quantity to stock
+                    $previousData = $context['previous_data'];
+                    //If previous order exist then revert stock 
+                    if ($previousData && !$previousData->getIsDeleted()) {
                         $oldOrderItems = $this->entityManager->getRepository(OrderItems::class)->findBy(['order' => $data]);
                         foreach ($oldOrderItems as $oldOrderItem) {
                             $product = $oldOrderItem->getProduct();
@@ -59,7 +40,7 @@ class OrderStockProcessor implements ProcessorInterface
                         }
                     }
 
-                    //Update new items quantity to stock
+                    //Update stock with new items quantity
                     foreach ($data->getItems() as $orderItem) {
                         $product = $orderItem->getProduct();
                         $newQuantity = $orderItem->getQuantity();
@@ -73,9 +54,9 @@ class OrderStockProcessor implements ProcessorInterface
                         $this->entityManager->persist($product);
                     }
                 }
-            }
 
-            $this->entityManager->flush();
+                $this->entityManager->flush();
+            }
         }
 
         $this->innerProcessor->process($data, $operation, $uriVariables, $context);

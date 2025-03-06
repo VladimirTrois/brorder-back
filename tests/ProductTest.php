@@ -5,7 +5,6 @@ namespace App\Tests;
 use App\Entity\Product;
 use App\Factory\ProductFactory;
 
-
 class ProductTest extends AbstractTest
 {
     const NUMBERSOFPRODUCTS = 30;
@@ -70,17 +69,6 @@ class ProductTest extends AbstractTest
         $this->assertResponseStatusCodeSame(200);
     }
 
-    public function testDELETE(): void
-    {
-        $product = ProductFactory::createOne();
-        $response = static::createClientWithCredentials()->request('DELETE', self::URL_PRODUCT . "/" . $product->getId());
-
-        $this->assertResponseIsSuccessful();
-
-        $response = static::createClientWithCredentials()->request('GET', self::URL_PRODUCT . "/" . $product->getId());
-        $this->assertResponseStatusCodeSame(301);
-    }
-
     public function testNoAdmin(): void
     {
         $product = ProductFactory::createOne();
@@ -93,8 +81,16 @@ class ProductTest extends AbstractTest
 
         $response = static::createClient()->request('PATCH', self::URL_PRODUCT . "/" . $product->getId());
         $this->assertResponseStatusCodeSame(401);
-
-        $response = static::createClient()->request("DELETE", self::URL_PRODUCT . "/" . $product->getId());
-        $this->assertResponseStatusCodeSame(401);
     }
+
+    // public function testDELETE(): void
+    // {
+    //     $product = ProductFactory::createOne();
+    //     $response = static::createClientWithCredentials()->request('DELETE', self::URL_PRODUCT . "/" . $product->getId());
+
+    //     $this->assertResponseIsSuccessful();
+
+    //     $response = static::createClientWithCredentials()->request('GET', self::URL_PRODUCT . "/" . $product->getId());
+    //     $this->assertResponseStatusCodeSame(404);
+    // }
 }

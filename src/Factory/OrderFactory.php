@@ -3,7 +3,6 @@
 namespace App\Factory;
 
 use App\Entity\Order;
-use App\Entity\OrderItems;
 use Zenstruck\Foundry\Persistence\PersistentProxyObjectFactory;
 
 /**
