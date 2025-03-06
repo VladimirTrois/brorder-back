@@ -67,7 +67,7 @@ class Product
 
     #[ORM\Column(nullable: true)]
     #[ApiFilter(SearchFilter::class)]
-    #[Groups(['product:read', 'product:write', 'order:read'])]
+    #[Groups(['product:read', 'product:write', 'order:read', 'order:collection:read'])]
     private ?int $stock = null;
 
     #[ORM\Column(nullable: true)]

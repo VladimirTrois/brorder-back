@@ -10,6 +10,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Order;
 use App\Entity\OrderItems;
 use Symfony\Component\DependencyInjection\Attribute\AsDecorator;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 #[AsDecorator('api_platform.doctrine.orm.state.persist_processor')]
 class OrderStockProcessor implements ProcessorInterface
@@ -57,7 +58,7 @@ class OrderStockProcessor implements ProcessorInterface
                             if ($product->getStock() >= $newQuantity) {
                                 $product->setStock($product->getStock() - $newQuantity);
                             } else {
-                                throw new \Exception('Not enough stock available');
+                                throw new HttpException(409, 'Not enough stock available');
                             }
                         }
                         $this->entityManager->persist($product);
