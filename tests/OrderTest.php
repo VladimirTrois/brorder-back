@@ -282,6 +282,45 @@ class OrderTest extends AbstractTest
         $this->assertProductStockEqual($product2, 18);
     }
 
+    public function testStockInfinity(): void
+    {
+        $product1 = ProductFactory::createOne(['stock' => -1]);
+        $responseOrder = static::createClientWithCredentials()->request('POST', self::URL_ORDER, [
+            'headers' => ['Content-Type' => 'application/ld+json'],
+            'json' => [
+                'name' => 'testOrder',
+                'pitch' => "A23",
+                'pickUpDate' => "2024-11-23",
+                'items' => [
+                    0 => [
+                        "product" => '/api/products/' . $product1->getId(),
+                        "quantity" => 4,
+                    ]
+                ],
+            ],
+        ]);
+
+        $this->assertProductStockEqual($product1, -1);
+
+        static::createClientWithCredentials()->request('PATCH', self::URL_ORDER . "/" . $responseOrder->toArray()['id'], [
+            'headers' => ['Content-Type' => 'application/merge-patch+json'],
+            'json' => [
+                'isDeleted' => true,
+            ],
+        ]);
+
+        $this->assertProductStockEqual($product1, -1);
+
+        static::createClientWithCredentials()->request('PATCH', self::URL_ORDER . "/" . $responseOrder->toArray()['id'], [
+            'headers' => ['Content-Type' => 'application/merge-patch+json'],
+            'json' => [
+                'isDeleted' => false,
+            ],
+        ]);
+
+        $this->assertProductStockEqual($product1, -1);
+    }
+
     // public function testDELETE(): void
     // {
     //     $order = OrderFactory::createOne();

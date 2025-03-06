@@ -26,7 +26,10 @@ class OrderStockProcessor implements ProcessorInterface
                     //Quantity is back to stock
                     foreach ($data->getItems() as $orderItem) {
                         $product = $orderItem->getProduct();
-                        $product->setStock($product->getStock() + $orderItem->getQuantity());
+                        if ($product->getStock() > -1) {
+                            $product->setStock($product->getStock() + $orderItem->getQuantity());
+                        }
+                        $this->entityManager->persist($product);
                     }
                 } else {
 
@@ -36,8 +39,11 @@ class OrderStockProcessor implements ProcessorInterface
                         $oldOrderItems = $this->entityManager->getRepository(OrderItems::class)->findBy(['order' => $data]);
                         foreach ($oldOrderItems as $oldOrderItem) {
                             $product = $oldOrderItem->getProduct();
-                            $product->setStock($product->getStock() + $oldOrderItem->getQuantity());
+                            if ($product->getStock() > -1) {
+                                $product->setStock($product->getStock() + $oldOrderItem->getQuantity());
+                            }
                         }
+                        $this->entityManager->persist($product);
                     }
 
                     //Update stock with new items quantity
@@ -46,10 +52,13 @@ class OrderStockProcessor implements ProcessorInterface
                         $newQuantity = $orderItem->getQuantity();
 
                         // Check stock before update
-                        if ($product->getStock() >= $newQuantity) {
-                            $product->setStock($product->getStock() - $newQuantity);
-                        } else {
-                            throw new \Exception('Not enough stock available');
+
+                        if ($product->getStock() > -1) {
+                            if ($product->getStock() >= $newQuantity) {
+                                $product->setStock($product->getStock() - $newQuantity);
+                            } else {
+                                throw new \Exception('Not enough stock available');
+                            }
                         }
                         $this->entityManager->persist($product);
                     }
