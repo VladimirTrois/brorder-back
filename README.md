@@ -24,14 +24,16 @@ L'application tourne avec docker et API platform sous symfony.
 ```
 make composer c='require symfony/orm-pack'
 make composer c='require api'
-make composer c='require symfony/maker-bundle --dev'
 make composer c='require lexik/jwt-authentication-bundle'
+make composer c="require symfony/serializer-pack"
+make composer c="require gesdinet/jwt-refresh-token-bundle"
+make composer c="require doctrine/doctrine-migrations-bundle"
+
+make composer c='require --dev symfony/maker-bundle'
 make composer c="require --dev foundry orm-fixtures"
 make composer c="require --dev symfony/test-pack symfony/http-client"
 make composer c="require --dev dama/doctrine-test-bundle"
 make composer c="require --dev justinrainbow/json-schema"
-make composer c="require symfony/serializer-pack"
-make composer c="require gesdinet/jwt-refresh-token-bundle"
 ```
 
 ### On first time run
