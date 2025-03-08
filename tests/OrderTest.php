@@ -4,7 +4,6 @@ namespace App\Tests;
 
 use App\Factory\OrderFactory;
 use App\Factory\ProductFactory;
-use stdClass;
 
 
 class OrderTest extends AbstractTest
@@ -34,14 +33,10 @@ class OrderTest extends AbstractTest
 
     public function testPOST(): void
     {
-        $product1 = ProductFactory::createOne();
-        $response1 = static::createClientWithCredentials()->request('GET', self::URL_BASE . "/products/" . $product1->getId());
-        $json = new stdClass();
-        $product2 = ProductFactory::createOne();
-        $response2 = static::createClientWithCredentials()->request('GET', self::URL_BASE . "/products/" . $product2->getId());
-        $json = new stdClass();
+        $product1 = ProductFactory::createOne(['stock' => 10]);
+        $product2 = ProductFactory::createOne(['stock' => 10]);
 
-        $response = static::createClientWithCredentials()->request('POST', self::URL_ORDER, [
+        $response = static::createClient()->request('POST', self::URL_ORDER, [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'testOrder',
@@ -49,11 +44,11 @@ class OrderTest extends AbstractTest
                 'pickUpDate' => "2024-11-23",
                 'items' => [
                     0 => [
-                        "product" => $response1->toArray()['@id'],
+                        "product" => '/api/products/' . $product1->getId(),
                         "quantity" => 2,
                     ],
                     1 => [
-                        "product" => $response2->toArray()['@id'],
+                        "product" => '/api/products/' . $product2->getId(),
                         "quantity" => 4,
                     ],
                 ],
@@ -72,16 +67,16 @@ class OrderTest extends AbstractTest
                 0 => [
                     '@type' => 'OrderItems',
                     "product" => [
-                        '@id' => $response1->toArray()['@id'],
-                        "name" => $response1->toArray()['name'],
+                        '@id' => '/api/products/' . $product1->getId(),
+                        "name" => $product1->getName(),
                     ],
                     "quantity" => 2,
                 ],
                 1 => [
                     '@type' => 'OrderItems',
                     "product" => [
-                        '@id' => $response2->toArray()['@id'],
-                        "name" => $response2->toArray()['name'],
+                        '@id' => '/api/products/' . $product2->getId(),
+                        "name" => $product2->getName(),
                     ],
                     "quantity" => 4,
                 ],
@@ -92,8 +87,8 @@ class OrderTest extends AbstractTest
 
     public function testPATCH(): void
     {
-        $product = ProductFactory::createOne();
-        $responseOrder = static::createClientWithCredentials()->request('POST', self::URL_ORDER, [
+        $product = ProductFactory::createOne(['stock' => 10]);
+        $responseOrder = static::createClient()->request('POST', self::URL_ORDER, [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'testOrder',
@@ -108,13 +103,172 @@ class OrderTest extends AbstractTest
             ],
         ]);
 
-        $response = static::createClientWithCredentials()->request('PATCH', self::URL_ORDER . "/" . $responseOrder->toArray()['id'], [
+        $response = static::createClient()->request('PATCH', self::URL_ORDER . "/" . $responseOrder->toArray()['id'], [
             'headers' => ['Content-Type' => 'application/merge-patch+json'],
             'json' => [
                 'isTaken' => true,
             ],
         ]);
         $this->assertResponseStatusCodeSame(200);
+    }
+
+    public function testPOSTonOrder(): void
+    {
+        $product1 = ProductFactory::createOne();
+        $product2 = ProductFactory::createOne();
+
+        $responseOrder = static::createClient()->request('POST', self::URL_ORDER, [
+            'headers' => ['Content-Type' => 'application/ld+json'],
+            'json' => [
+                'name' => 'testOrder',
+                'pitch' => "A23",
+                'pickUpDate' => "2024-11-23",
+                'items' => [
+                    0 => [
+                        "product" => '/api/products/' . $product1->getId(),
+                        "quantity" => 4,
+                    ],
+                    1 => [
+                        "product" => '/api/products/' . $product2->getId(),
+                        "quantity" => 2,
+                    ]
+                ],
+            ],
+        ]);
+        $this->assertResponseStatusCodeSame(201);
+
+        $responseOrder = static::createClient()->request('POST', self::URL_ORDER, [
+            'headers' => ['Content-Type' => 'application/ld+json'],
+            'json' => [
+                'name' => 'testOrder',
+                'pitch' => "A23",
+                'pickUpDate' => "2024-11-23",
+                'items' => [
+                    0 => [
+                        "product" => '/api/products/' . $product1->getId(),
+                        "quantity" => 1,
+                    ],
+                    1 => [
+                        "product" => '/api/products/' . $product2->getId(),
+                        "quantity" => 5,
+                    ]
+                ],
+            ],
+        ]);
+
+        $this->assertResponseStatusCodeSame(422);
+        $this->assertJsonContains([
+            'cause' => [
+                '@context' => '/api/contexts/Order',
+                '@type' => 'Order',
+                'name' => 'testOrder',
+                'pitch' => "A23",
+                'pickUpDate' => "2024-11-23",
+                'items' => [
+                    0 => [
+                        '@type' => 'OrderItems',
+                        "product" => [
+                            "name" => $product1->getName(),
+                        ],
+                        "quantity" => 4,
+                    ],
+                    1 => [
+                        '@type' => 'OrderItems',
+                        "product" => [
+                            "name" => $product2->getName(),
+                        ],
+                        "quantity" => 2,
+                    ],
+                ],
+            ]
+        ]);
+    }
+
+    public function testPOSTonDeletedOrder(): void
+    {
+        $product1 = ProductFactory::createOne(['stock' => 10]);
+        $product2 = ProductFactory::createOne(['stock' => -1]);
+
+        $responseOrder = static::createClient()->request('POST', self::URL_ORDER, [
+            'headers' => ['Content-Type' => 'application/ld+json'],
+            'json' => [
+                'name' => 'testOrder',
+                'pitch' => "A23",
+                'pickUpDate' => "2024-11-23",
+                'items' => [
+                    0 => [
+                        "product" => '/api/products/' . $product1->getId(),
+                        "quantity" => 4,
+                    ],
+                    1 => [
+                        "product" => '/api/products/' . $product2->getId(),
+                        "quantity" => 2,
+                    ]
+                ],
+            ],
+        ]);
+        $this->assertResponseStatusCodeSame(201);
+        $this->assertProductStockEqual($product1, 6);
+        $this->assertProductStockEqual($product2, -1);
+
+        static::createClient()->request('PATCH', self::URL_ORDER . "/" . $responseOrder->toArray()['id'], [
+            'headers' => ['Content-Type' => 'application/merge-patch+json'],
+            'json' => [
+                'isDeleted' => true,
+            ],
+        ]);
+        $this->assertResponseStatusCodeSame(200);
+        $this->assertProductStockEqual($product1, 10);
+        $this->assertProductStockEqual($product2, -1);
+
+        $responseOrder = static::createClient()->request('POST', self::URL_ORDER, [
+            'headers' => ['Content-Type' => 'application/ld+json'],
+            'json' => [
+                'name' => 'testOrder',
+                'pitch' => "A23",
+                'pickUpDate' => "2024-11-23",
+                'items' => [
+                    0 => [
+                        "product" => '/api/products/' . $product1->getId(),
+                        "quantity" => 1,
+                    ],
+                    1 => [
+                        "product" => '/api/products/' . $product2->getId(),
+                        "quantity" => 5,
+                    ]
+                ],
+            ],
+        ]);
+
+        $this->assertResponseStatusCodeSame(201);
+        $this->assertJsonContains([
+            '@context' => '/api/contexts/Order',
+            '@type' => 'Order',
+            'name' => 'testOrder',
+            'pitch' => "A23",
+            'pickUpDate' => "2024-11-23",
+            'items' => [
+                0 => [
+                    '@type' => 'OrderItems',
+                    "product" => [
+                        '@id' => '/api/products/' . $product1->getId(),
+                        "name" => $product1->getName(),
+                    ],
+                    "quantity" => 1,
+                ],
+                1 => [
+                    '@type' => 'OrderItems',
+                    "product" => [
+                        '@id' => '/api/products/' . $product2->getId(),
+                        "name" => $product2->getName(),
+                    ],
+                    "quantity" => 5,
+                ],
+            ],
+        ]);
+
+        $this->assertProductStockEqual($product1, 9);
+        $this->assertProductStockEqual($product2, -1);
     }
 
     public function testStockOnPOST(): void
@@ -260,6 +414,18 @@ class OrderTest extends AbstractTest
 
         $this->assertProductStockEqual($product1, 6);
         $this->assertProductStockEqual($product2, 18);
+
+        static::createClientWithCredentials()->request('PATCH', self::URL_ORDER . "/" . $responseOrder->toArray()['id'], [
+            'headers' => ['Content-Type' => 'application/merge-patch+json'],
+            'json' => [
+                'isDeleted' => true,
+            ],
+        ]);
+
+        $this->assertProductStockEqual($product1, 10);
+        $this->assertProductStockEqual($product2, 20);
+
+
 
         static::createClientWithCredentials()->request('PATCH', self::URL_ORDER . "/" . $responseOrder->toArray()['id'], [
             'headers' => ['Content-Type' => 'application/merge-patch+json'],

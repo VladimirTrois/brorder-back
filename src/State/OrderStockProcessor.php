@@ -22,19 +22,21 @@ class OrderStockProcessor implements ProcessorInterface
         if ($data instanceof Order && ($operation instanceof Post || $operation instanceof Patch)) {
             $requestContent = $context['request']->getContent();
             if ((str_contains($requestContent, 'items') || str_contains($requestContent, 'isDeleted'))) {
+                $previousData = $context['previous_data'];
                 //If Order is being deleted 
                 if ($data->getIsDeleted()) {
-                    //Quantity is back to stock
-                    foreach ($data->getItems() as $orderItem) {
-                        $product = $orderItem->getProduct();
-                        if ($product->getStock() > -1) {
-                            $product->setStock($product->getStock() + $orderItem->getQuantity());
+                    //Quantity is back to stock if previousData was not deleted
+                    if ($previousData && !$previousData->getIsDeleted()) {
+                        //Quantity is back to stock
+                        foreach ($data->getItems() as $orderItem) {
+                            $product = $orderItem->getProduct();
+                            if ($product->getStock() > -1) {
+                                $product->setStock($product->getStock() + $orderItem->getQuantity());
+                            }
+                            $this->entityManager->persist($product);
                         }
-                        $this->entityManager->persist($product);
                     }
                 } else {
-
-                    $previousData = $context['previous_data'];
                     //If previous order exist then revert stock 
                     if ($previousData && !$previousData->getIsDeleted()) {
                         $oldOrderItems = $this->entityManager->getRepository(OrderItems::class)->findBy(['order' => $data]);
@@ -53,7 +55,6 @@ class OrderStockProcessor implements ProcessorInterface
                         $newQuantity = $orderItem->getQuantity();
 
                         // Check stock before update
-
                         if ($product->getStock() > -1) {
                             if ($product->getStock() >= $newQuantity) {
                                 $product->setStock($product->getStock() - $newQuantity);

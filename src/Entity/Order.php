@@ -12,7 +12,10 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
 use App\Repository\OrderRepository;
+use App\State\OrderPostProcessor;
+use App\Validator\UniqueActiveGroup;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -34,14 +37,16 @@ use Symfony\Component\Validator\Constraints as Assert;
     message: "The group (Name, Pitch and pickUpdate) are already used"
 )]
 //Declared alone so it is public
-#[Post(
-    normalizationContext: ['groups' => ['order:collection:read', 'order:read']],
-    denormalizationContext: ['groups' => ['order:write']],
-)]
-#[Patch(
-    normalizationContext: ['groups' => ['order:collection:read', 'order:read']],
-    denormalizationContext: ['groups' => ['order:write']],
-)]
+#[
+    Post(
+        normalizationContext: ['groups' => ['order:collection:read', 'order:read']],
+        denormalizationContext: ['groups' => ['order:write']],
+    ),
+    Patch(
+        normalizationContext: ['groups' => ['order:collection:read', 'order:read']],
+        denormalizationContext: ['groups' => ['order:write']]
+    )
+]
 #[ApiResource(
     paginationItemsPerPage: 10,
     operations: [
@@ -191,6 +196,15 @@ class Order
     public function getItems(): Collection
     {
         return $this->items;
+    }
+
+    public function setItems(Collection $items): static
+    {
+        foreach ($items as $item) {
+            $item->setOrder($this);
+        }
+        $this->items = $items;
+        return $this;
     }
 
     public function addItem(OrderItems $item): static
