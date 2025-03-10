@@ -30,7 +30,7 @@ final class OrderFactory extends PersistentProxyObjectFactory
     protected function defaults(): array|callable
     {
         return [
-            'name' => self::faker()->lastName(),
+            'name' => strtolower(self::faker()->lastName()),
             'pitch' => self::faker()->randomLetter() . self::faker()->numberBetween(0, 1) . self::faker()->numberBetween(0, 9),
             'pickUpDate' => self::faker()->dateTimeBetween('-0 days', '+0 days'),
             'isDeleted' => self::faker()->boolean(10),
