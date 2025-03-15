@@ -114,8 +114,8 @@ class OrderTest extends AbstractTest
 
     public function testPOSTonOrder(): void
     {
-        $product1 = ProductFactory::createOne();
-        $product2 = ProductFactory::createOne();
+        $product1 = ProductFactory::createOne(['stock' => 10]);
+        $product2 = ProductFactory::createOne(['stock' => 10]);
 
         $responseOrder = static::createClient()->request('POST', self::URL_ORDER, [
             'headers' => ['Content-Type' => 'application/ld+json'],

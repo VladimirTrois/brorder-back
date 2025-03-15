@@ -2,6 +2,7 @@
 
 namespace App\DataFixtures;
 
+use App\Factory\AllergyFactory;
 use App\Factory\ProductFactory;
 use App\Factory\OrderFactory;
 use App\Factory\UserFactory;
@@ -25,6 +26,14 @@ class AppFixturesReal extends Fixture implements FixtureGroupInterface
 
     ];
 
+    public const REALALLERGIES = [
+        "Gluten",
+        "Oeufs/Eggs",
+        "Lait/Milk",
+        "Soja",
+        "Graines de sésame"
+    ];
+
     public function load(ObjectManager $manager): void
     {
         UserFactory::createOne(
@@ -34,6 +43,15 @@ class AppFixturesReal extends Fixture implements FixtureGroupInterface
                 'roles' => ["ROLE_ADMIN"],
 
             ]
+        );
+
+        $allergies = AllergyFactory::createMany(
+            count(SELF::REALALLERGIES),
+            static function (int $i) {
+                return [
+                    'name' => SELF::REALALLERGIES[$i - 1]
+                ];
+            }
         );
 
         $products = ProductFactory::createMany(

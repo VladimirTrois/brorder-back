@@ -12,6 +12,8 @@ use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Patch;
 use App\Repository\ProductRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -73,6 +75,18 @@ class Product
     #[ORM\Column(nullable: true)]
     #[Groups(['product:read', 'product:write'])]
     private ?int $rank = null;
+
+    /**
+     * @var Collection<int, ProductAllergy>
+     */
+    #[ORM\OneToMany(targetEntity: ProductAllergy::class, mappedBy: 'product', orphanRemoval: true, cascade: ['persist'])]
+    #[Groups(['product:read', 'product:write'])]
+    private Collection $allergies;
+
+    public function __construct()
+    {
+        $this->allergies = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -159,6 +173,36 @@ class Product
     public function setRank(?int $rank): static
     {
         $this->rank = $rank;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ProductAllergy>
+     */
+    public function getAllergies(): Collection
+    {
+        return $this->allergies;
+    }
+
+    public function addAllergy(ProductAllergy $allergy): static
+    {
+        if (!$this->allergies->contains($allergy)) {
+            $this->allergies->add($allergy);
+            $allergy->setProduct($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAllergy(ProductAllergy $allergy): static
+    {
+        if ($this->allergies->removeElement($allergy)) {
+            // set the owning side to null (unless already changed)
+            if ($allergy->getProduct() === $this) {
+                $allergy->setProduct(null);
+            }
+        }
 
         return $this;
     }

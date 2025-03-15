@@ -46,6 +46,7 @@ security:
     access_control:
         - { path: ^/api/docs, roles: PUBLIC_ACCESS }
         - { path: ^/api/(login|token/refresh), roles: PUBLIC_ACCESS }
+        - { path: ^/api/allergies, roles: PUBLIC_ACCESS, methods:[GET] }
         - { path: ^/api/products, roles: PUBLIC_ACCESS, methods:[GET] }
         - { path: ^/api/orders, roles: PUBLIC_ACCESS, methods:[POST,PATCH] }
         - { path: ^/, roles: ROLE_ADMIN }

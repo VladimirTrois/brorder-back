@@ -3,6 +3,7 @@
 namespace App\Tests;
 
 use App\Entity\Product;
+use App\Factory\AllergyFactory;
 use App\Factory\ProductFactory;
 
 class ProductTest extends AbstractTest
@@ -31,6 +32,9 @@ class ProductTest extends AbstractTest
 
     public function testPOST(): void
     {
+        $allergy1 = AllergyFactory::createOne();
+        $allergy2 = AllergyFactory::createOne();
+
         $response = static::createClientWithCredentials()->request('POST', self::URL_PRODUCT, [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
@@ -38,7 +42,17 @@ class ProductTest extends AbstractTest
                 'price' => 3452,
                 'weight' => 234,
                 'image' => '/url/test',
-                'stock' => 3
+                'stock' => 3,
+                'allergies' => [
+                    0 => [
+                        "allergy" => '/api/allergies/' . $allergy1->getId(),
+                        "level" => 'No',
+                    ],
+                    1 => [
+                        "allergy" => '/api/allergies/' . $allergy2->getId(),
+                        "level" => 'May contain',
+                    ]
+                ]
             ],
         ]);
 
@@ -51,7 +65,23 @@ class ProductTest extends AbstractTest
             'price' => 3452,
             'weight' => 234,
             'image' => '/url/test',
-            'stock' => 3
+            'stock' => 3,
+            'allergies' => [
+                0 => [
+                    "@type" => 'ProductAllergy',
+                    "allergy" => [
+                        "name" => $allergy1->getName(),
+                    ],
+                    "level" => 'No',
+                ],
+                1 => [
+                    "@type" => 'ProductAllergy',
+                    "allergy" => [
+                        "name" => $allergy2->getName(),
+                    ],
+                    "level" => 'May contain',
+                ]
+            ]
         ]);
         $this->assertMatchesRegularExpression('~^/api/products/\d+$~', $response->toArray()['@id']);
         $this->assertMatchesResourceItemJsonSchema(Product::class);
