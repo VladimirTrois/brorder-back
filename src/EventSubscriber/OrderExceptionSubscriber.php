@@ -39,39 +39,38 @@ class OrderExceptionSubscriber implements EventSubscriberInterface
 
             $violations = $exception->getConstraintViolationList();
 
-            // Loop through violations to identify unique constraint violations
+            // Handle Order already exist violation
             foreach ($violations as $violation) {
-
                 if ($violation->getMessage() === "The group (Name, Pitch and pickUpdate) are already used") {
-                    // Retrieve existing order
+
+                    // Retrieve original order
                     $cause = $violation->getCause();
-                    $previousOrder = $this->entityManager->getRepository(Order::class)->findOneBy([
+                    $originalOrder = $this->entityManager->getRepository(Order::class)->findOneBy([
                         'id' => $cause[0]->getId(),
                     ]);
 
-                    // Check if the order exists
-                    if ($previousOrder) {
-                        //If previous order isDeleted then handle
-                        if ($previousOrder->getIsDeleted()) {
+                    if ($originalOrder) {
+                        if ($originalOrder->getIsDeleted()) {
+
+                            //Handle when original order isDeleted
                             $newOrder = $violation->getRoot();
-                            $this->handlePostOnDeletedOrder($event, $previousOrder, $newOrder);
+                            $this->handlePostOnIsDeletedOrder($event, $originalOrder, $newOrder);
                             return;
                         } else {
-                            // Serialize the order using the proper normalization context, including items
-                            $orderData = $this->serializer->serialize($cause[0], 'jsonld', ['groups' => ['order:read', 'order:collection:read']]);
 
-                            // Return a custom response with the serialized order data
+                            //Handle custom response if original order is valid
+                            $orderData = $this->serializer->serialize($cause[0], 'jsonld', ['groups' => ['order:read', 'order:collection:read']]);
                             $response = new JsonResponse(
                                 [
                                     'status' => $exception->getStatus(),
                                     'type' => $exception->getType(),
                                     'title' => $exception->getTitle(),
                                     'message' => 'name: The group (Name, Pitch and pickUpdate) are already used',
-                                    'cause' => json_decode($orderData) // Decode the JSON string back to an array
+                                    'cause' => json_decode($orderData)
                                 ]
                             );
 
-                            $event->setResponse($response); // Stop the exception from bubbling further
+                            $event->setResponse($response); // Stop the exception
                             return;
                         }
                     }
@@ -80,8 +79,8 @@ class OrderExceptionSubscriber implements EventSubscriberInterface
         }
     }
 
-    //Undelete order and replace items with newOrder
-    function handlePostOnDeletedOrder(ExceptionEvent $event, Order $order, Order $newOrder): void
+    //Undelete order and replace items from newOrder
+    function handlePostOnIsDeletedOrder(ExceptionEvent $event, Order $order, Order $newOrder): void
     {
         if ($newOrder instanceof Order) {
             //Set old order to active
@@ -109,15 +108,16 @@ class OrderExceptionSubscriber implements EventSubscriberInterface
                 }
                 $this->entityManager->persist($product);
             }
-            $order->setItems($newOrder->getItems());
 
+            $order->setItems($newOrder->getItems());
             $this->entityManager->persist($order);
             $this->entityManager->flush();
 
             $orderData = $this->serializer->serialize($order, 'jsonld', ['groups' => ['order:read', 'order:collection:read']]);
             $response = new JsonResponse(json_decode($orderData));
             $response->setStatusCode(201);
-            $event->setResponse($response); // Stop the exception from bubbling further
+
+            $event->setResponse($response); // Stop the exception
         }
     }
 }

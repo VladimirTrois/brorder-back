@@ -26,7 +26,7 @@ final class Version20250315175653 extends AbstractMigration
         $this->addSql('CREATE INDEX IDX_1A6859054584665A ON product_allergy (product_id)');
         $this->addSql('CREATE INDEX IDX_1A685905DBFD579D ON product_allergy (allergy_id)');
         $this->addSql('ALTER TABLE product_allergy ADD CONSTRAINT FK_1A6859054584665A FOREIGN KEY (product_id) REFERENCES product (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
-        $this->addSql('ALTER TABLE product_allergy ADD CONSTRAINT FK_1A685905DBFD579D FOREIGN KEY (allergy_id) REFERENCES allergy (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
+        $this->addSql('ALTER TABLE product_allergy ADD CONSTRAINT FK_1A685905DBFD579D FOREIGN KEY (allergy_id) REFERENCES allergy (id) ON DELETE CASCADE NOT DEFERRABLE INITIALLY IMMEDIATE');
     }
 
     public function down(Schema $schema): void
