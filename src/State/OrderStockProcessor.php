@@ -19,15 +19,15 @@ class OrderStockProcessor implements ProcessorInterface
 
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): mixed
     {
+        // Handle stock during order POST or PATCH
         if ($data instanceof Order && ($operation instanceof Post || $operation instanceof Patch)) {
             $requestContent = $context['request']->getContent();
             if ((str_contains($requestContent, 'items') || str_contains($requestContent, 'isDeleted'))) {
-                $previousData = $context['previous_data'];
-                //If Order is being deleted 
+                $previousOrder = $context['previous_data'];
+
                 if ($data->getIsDeleted()) {
-                    //Quantity is back to stock if previousData was not deleted
-                    if ($previousData && !$previousData->getIsDeleted()) {
-                        //Quantity is back to stock
+                    //If Order is being deleted revert stock only if first isDeleted for order
+                    if ($previousOrder && !$previousOrder->getIsDeleted()) {
                         foreach ($data->getItems() as $orderItem) {
                             $product = $orderItem->getProduct();
                             if ($product->getStock() > -1) {
@@ -38,7 +38,7 @@ class OrderStockProcessor implements ProcessorInterface
                     }
                 } else {
                     //If previous order exist then revert stock 
-                    if ($previousData && !$previousData->getIsDeleted()) {
+                    if ($previousOrder && !$previousOrder->getIsDeleted()) {
                         $oldOrderItems = $this->entityManager->getRepository(OrderItems::class)->findBy(['order' => $data]);
                         foreach ($oldOrderItems as $oldOrderItem) {
                             $product = $oldOrderItem->getProduct();
