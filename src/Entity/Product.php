@@ -35,7 +35,7 @@ use App\DataProvider\ProductsOrderedAllergiesProvider;
         new Post(),
         new Patch(),
     ],
-    normalizationContext: ['groups' => ['product:read', 'product:write'],],
+    normalizationContext: ['groups' => ['product:read'],],
     denormalizationContext: ['groups' => ['product:write']],
     security: "is_granted('ROLE_ADMIN')",
 )]

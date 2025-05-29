@@ -51,9 +51,9 @@ use Symfony\Component\Validator\Constraints as Assert;
         new Get(normalizationContext: ['groups' => ['order:collection:read', 'order:read']]),
     ],
     denormalizationContext: ['groups' => ['order:write']],
+    order: ['isTaken' => 'asc'],
     security: "is_granted('ROLE_ADMIN')"
 )]
-#[ApiResource(order: ['isTaken' => 'asc'])]
 #[ApiFilter(OrderFilter::class, properties: ['isTaken', 'name', 'pitch'], arguments: ['orderParameterName' => 'orderBy'])]
 class Order
 {
