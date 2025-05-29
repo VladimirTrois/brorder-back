@@ -31,18 +31,18 @@ class StatisticsProvider implements ProviderInterface
         $totalOrders = $statsOrders[0]['totalOrders'] ?? 0;
 
         $totalProductsResults = $this->orderRepository->getDailyTotalProducts($dateObject);
-        $totalProducts = array_map(fn($totalProductsQueryResult) => [
-            'id' => $totalProductsQueryResult['productId'],
-            'name' => $totalProductsQueryResult['productName'],
-            'count' => $totalProductsQueryResult['productCount'],
+        $totalProducts = array_map(fn($queryResult) => [
+            'id' => $queryResult['productId'],
+            'name' => $queryResult['productName'],
+            'count' => $queryResult['productCount'],
         ], $totalProductsResults);
 
 
         $totalProductsNotSoldResults = $this->orderRepository->getDailyTotalProductsNotSold($dateObject);
-        $totalProductsNotSold = array_map(fn($totalProductsNotSoldResult) => [
-            'id' => $totalProductsNotSoldResult['productId'],
-            'name' => $totalProductsNotSoldResult['productName'],
-            'count' => $totalProductsNotSoldResult['productCount'],
+        $totalProductsNotSold = array_map(fn($queryResult) => [
+            'id' => $queryResult['productId'],
+            'name' => $queryResult['productName'],
+            'count' => $queryResult['productCount'],
         ], $totalProductsNotSoldResults);
 
         return new Statistics($dateObject->format('Y-m-d'), $totalOrders, $totalProducts, $totalProductsNotSold);

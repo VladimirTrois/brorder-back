@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20250315141531 extends AbstractMigration
+final class Version20250315175653 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -21,6 +21,7 @@ final class Version20250315141531 extends AbstractMigration
     {
         // this up() migration is auto-generated, please modify it to your needs
         $this->addSql('CREATE TABLE allergy (id SERIAL NOT NULL, name VARCHAR(255) NOT NULL, PRIMARY KEY(id))');
+        $this->addSql('CREATE UNIQUE INDEX UNIQ_CBB142B55E237E06 ON allergy (name)');
         $this->addSql('CREATE TABLE product_allergy (id SERIAL NOT NULL, product_id INT NOT NULL, allergy_id INT NOT NULL, level VARCHAR(255) NOT NULL, PRIMARY KEY(id))');
         $this->addSql('CREATE INDEX IDX_1A6859054584665A ON product_allergy (product_id)');
         $this->addSql('CREATE INDEX IDX_1A685905DBFD579D ON product_allergy (allergy_id)');

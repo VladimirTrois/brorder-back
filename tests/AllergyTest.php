@@ -51,4 +51,14 @@ class AllergyTest extends AbstractTest
         ]);
         $this->assertResponseStatusCodeSame(200);
     }
+
+    public function testDelete(): void
+    {
+        $allergy = AllergyFactory::createOne();
+
+        $response = static::createClientWithCredentials()->request('DELETE', self::URL_ALLERGY . "/" . $allergy->getId());
+
+        $this->assertResponseIsSuccessful();
+        $this->assertResponseStatusCodeSame(204);
+    }
 }

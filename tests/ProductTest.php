@@ -22,6 +22,62 @@ class ProductTest extends AbstractTest
         $this->assertJsonContains(["totalItems" => self::NUMBERSOFPRODUCTS]);
     }
 
+    public function testGetCollectionWithAllergies(): void
+    {
+        $allergy1 = AllergyFactory::createOne(['name' => 'B']);
+        $allergy2 = AllergyFactory::createOne(['name' => 'A']);
+
+        $response = static::createClientWithCredentials()->request('POST', self::URL_PRODUCT, [
+            'headers' => ['Content-Type' => 'application/ld+json'],
+            'json' => [
+                'name' => 'AAAAAAAAA',
+                'price' => 3452,
+                'weight' => 234,
+                'image' => '/url/test',
+                'stock' => 3,
+                'allergies' => [
+                    0 => [
+                        "allergy" => '/api/allergies/' . $allergy1->getId(),
+                        "level" => 'No',
+                    ],
+                    1 => [
+                        "allergy" => '/api/allergies/' . $allergy2->getId(),
+                        "level" => 'May contain',
+                    ]
+                ]
+            ],
+        ]);
+        $this->assertResponseIsSuccessful();
+
+        $response = static::createClient()->request('GET', self::URL_PRODUCT . '/allergies');
+
+        $this->assertResponseIsSuccessful();
+        $this->assertMatchesResourceCollectionJsonSchema(Product::class);
+        $this->assertJsonContains([
+            'member' => [
+                0 => [
+                    'name' => 'AAAAAAAAA',
+                    'allergies' => [
+                        0 => [
+                            "@type" => 'ProductAllergy',
+                            "allergy" => [
+                                "name" => $allergy2->getName(),
+                            ],
+                            "level" => 'May contain',
+                        ],
+                        1 => [
+                            "@type" => 'ProductAllergy',
+                            "allergy" => [
+                                "name" => $allergy1->getName(),
+                            ],
+                            "level" => 'No',
+                        ]
+                    ]
+                ]
+            ]
+        ]);
+    }
+
     public function testGET(): void
     {
         $product = ProductFactory::createOne();
@@ -66,22 +122,6 @@ class ProductTest extends AbstractTest
             'weight' => 234,
             'image' => '/url/test',
             'stock' => 3,
-            'allergies' => [
-                0 => [
-                    "@type" => 'ProductAllergy',
-                    "allergy" => [
-                        "name" => $allergy1->getName(),
-                    ],
-                    "level" => 'No',
-                ],
-                1 => [
-                    "@type" => 'ProductAllergy',
-                    "allergy" => [
-                        "name" => $allergy2->getName(),
-                    ],
-                    "level" => 'May contain',
-                ]
-            ]
         ]);
         $this->assertMatchesRegularExpression('~^/api/products/\d+$~', $response->toArray()['@id']);
         $this->assertMatchesResourceItemJsonSchema(Product::class);
@@ -93,7 +133,7 @@ class ProductTest extends AbstractTest
         $response = static::createClientWithCredentials()->request('PATCH', self::URL_PRODUCT . "/" . $product->getId(), [
             'headers' => ['Content-Type' => 'application/merge-patch+json'],
             'json' => [
-                'username' => 'changeg',
+                'username' => 'change',
             ],
         ]);
         $this->assertResponseStatusCodeSame(200);

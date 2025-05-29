@@ -1,7 +1,5 @@
 <?php
 
-// src/EventSubscriber/OrderExceptionSubscriber.php
-
 namespace App\EventSubscriber;
 
 use ApiPlatform\Symfony\EventListener\EventPriorities;
@@ -11,7 +9,6 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Entity\Order;
-use PhpParser\Node\Expr\Instanceof_;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -27,9 +24,6 @@ class OrderExceptionSubscriber implements EventSubscriberInterface
         $this->serializer = $serializer;
     }
 
-    /**
-     * Returns an array of events to subscribe to.
-     */
     public static function getSubscribedEvents(): array
     {
         return [
@@ -41,16 +35,15 @@ class OrderExceptionSubscriber implements EventSubscriberInterface
     {
         $exception = $event->getThrowable();
 
-        // Check for the ValidationException
         if ($exception instanceof ValidationException) {
-            // Get the violations (errors)
+
             $violations = $exception->getConstraintViolationList();
 
             // Loop through violations to identify unique constraint violations
             foreach ($violations as $violation) {
-                // Check if this violation is related to the unique constraint
+
                 if ($violation->getMessage() === "The group (Name, Pitch and pickUpdate) are already used") {
-                    // Retrieve the existing order with the same name, pitch, and pickup date
+                    // Retrieve existing order
                     $cause = $violation->getCause();
                     $previousOrder = $this->entityManager->getRepository(Order::class)->findOneBy([
                         'id' => $cause[0]->getId(),
@@ -58,7 +51,7 @@ class OrderExceptionSubscriber implements EventSubscriberInterface
 
                     // Check if the order exists
                     if ($previousOrder) {
-                        //If previous order isDeleted then handle logic
+                        //If previous order isDeleted then handle
                         if ($previousOrder->getIsDeleted()) {
                             $newOrder = $violation->getRoot();
                             $this->handlePostOnDeletedOrder($event, $previousOrder, $newOrder);

@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Patch;
 use App\Repository\ProductAllergyRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -10,14 +11,19 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ProductAllergyRepository::class)]
 #[ApiResource(
-    operations: []
+    operations: [
+        new Patch(),
+    ],
+    normalizationContext: ['groups' => ['product_allergy:read']],
+    denormalizationContext: ['groups' => ['product_allergy:write']],
+    security: "is_granted('ROLE_ADMIN')",
 )]
 class ProductAllergy
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['product:read', 'product:write'])]
+    #[Groups(['product_allergy:read', 'product_allergy:write', 'product:read', 'product:write'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'allergies')]
@@ -25,13 +31,13 @@ class ProductAllergy
     private ?Product $product = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['product:read', 'product:write'])]
+    #[ORM\JoinColumn(nullable: false, onDelete: "CASCADE")]
+    #[Groups(['product_allergy:read', 'product_allergy:write', 'product:read', 'product:write'])]
     #[Assert\Type(Allergy::class)]
     private ?Allergy $allergy = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['product:read', 'product:write'])]
+    #[Groups(['product_allergy:read', 'product_allergy:write', 'product:read', 'product:write'])]
     private ?string $level = null;
 
     public function getId(): ?int

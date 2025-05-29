@@ -20,5 +20,10 @@ services:
             - "../src/Entity/"
             - "../src/Kernel.php"
 
+    App\DataProvider\ProductsOrderedAllergiesProvider:
+        arguments:
+            $collectionExtensions: !tagged_iterator api_platform.doctrine.orm.query_extension.collection
+
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

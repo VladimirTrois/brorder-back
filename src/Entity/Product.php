@@ -17,9 +17,17 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+use App\DataProvider\ProductsOrderedAllergiesProvider;
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
-#[GetCollection()] //Declared alone so it is public
+#[GetCollection(
+    normalizationContext: ['groups' => ['product:read'],],
+)] //Declared alone so it is public
+#[GetCollection(
+    provider: ProductsOrderedAllergiesProvider::class,
+    uriTemplate: '/products/allergies',
+    normalizationContext: ['groups' => ['product:read', 'product:read:allergies'],],
+)] //Declared alone so it is public
 #[ApiResource(
     paginationItemsPerPage: 10,
     operations: [
@@ -27,9 +35,9 @@ use Symfony\Component\Validator\Constraints as Assert;
         new Post(),
         new Patch(),
     ],
-    normalizationContext: ['groups' => ['product:read'],],
+    normalizationContext: ['groups' => ['product:read', 'product:write'],],
     denormalizationContext: ['groups' => ['product:write']],
-    security: "is_granted('ROLE_ADMIN')"
+    security: "is_granted('ROLE_ADMIN')",
 )]
 #[ApiFilter(OrderFilter::class, properties: ['rank', 'isAvailable'], arguments: ['orderParameterName' => 'orderBy'])]
 class Product
@@ -37,6 +45,7 @@ class Product
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['product:read', 'order:read', 'order:collection:read'])]
     private ?int $id;
 
     #[ORM\Column(length: 255, nullable: false, unique: true)]
@@ -80,7 +89,7 @@ class Product
      * @var Collection<int, ProductAllergy>
      */
     #[ORM\OneToMany(targetEntity: ProductAllergy::class, mappedBy: 'product', orphanRemoval: true, cascade: ['persist'])]
-    #[Groups(['product:read', 'product:write'])]
+    #[Groups(['product:read:allergies', 'product:write'])]
     private Collection $allergies;
 
     public function __construct()
