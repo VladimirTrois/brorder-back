@@ -60,8 +60,9 @@ sf: ## List all Symfony commands or pass the parameter "c=" to run a given comma
 cc: c=c:c ## Clear the cache
 cc: sf
 
-rebootDB: c=doctrine:database:drop --force
-rebootDB: sf
+## —— Database ———————————————————————————————————————————————————————————————
+dropDB: c=doctrine:database:drop --force
+dropDB: sf
 
 createDB: c=doctrine:database:create
 createDB: sf
