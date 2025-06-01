@@ -151,6 +151,11 @@ class Order
         return $this->pickUpDate;
     }
 
+    public function getPickUpDateFormated(): string
+    {
+        return $this->pickUpDate->format('Y-m-d');
+    }
+
     public function setPickUpDate(\DateTimeInterface $pickUpDate): static
     {
         $this->pickUpDate = $pickUpDate;

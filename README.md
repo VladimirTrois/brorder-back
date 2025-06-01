@@ -4,11 +4,11 @@
 
 ## Informations
 
-Partie back de Brorder une application de gestion de commande de pain. 
+Partie back de Brorder une application de gestion de commande. 
 Cette application est réalisé pour un camping afin que les clients puissent commander du pain la veille pour le lendemain.
 Le camping doit ensuite pouvoir gérer ses produits et les commandes.
 
-L'application tourne avec docker et API platform sous symfony.
+L'application tourne avec docker et API platform sur symfony.
 
 ## Getting Started
 

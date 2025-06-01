@@ -5,13 +5,12 @@ namespace App\Tests;
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
 use ApiPlatform\Symfony\Bundle\Test\Client;
 use App\Factory\UserFactory;
+use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Zenstruck\Foundry\Test\Factories;
 use Zenstruck\Foundry\Test\ResetDatabase;
 
 abstract class AbstractTest extends ApiTestCase
 {
-    private ?string $token = null;
-
     const USERNAME = "usernameExample";
     const PASSWORD = "passwordExample";
     const URL_BASE = "http://localhost:8000/api";
@@ -19,52 +18,30 @@ abstract class AbstractTest extends ApiTestCase
 
     use ResetDatabase, Factories;
 
+    private ?string $token = null;
+    protected JWTTokenManagerInterface $jwtManager;
+
     public function setUp(): void
     {
-        UserFactory::createOne(
-            [
-                'username' => SELF::USERNAME,
-                'password' => SELF::PASSWORD,
-                'roles' => ["ROLE_ADMIN"],
-            ]
-        );
-
         self::bootKernel();
+
+        $this->jwtManager = self::getContainer()->get(JWTTokenManagerInterface::class);
+
+        $user = UserFactory::createOne([
+            'username' => self::USERNAME,
+            'password' => self::PASSWORD,
+            'roles' => ['ROLE_ADMIN'],
+        ]);
+
+        $this->token = $this->jwtManager->create($user);
     }
 
     protected function createClientWithCredentials($token = null): Client
     {
-        $token = $token ?: $this->getToken();
-
-        return static::createClient([], ['headers' => ['authorization' => 'Bearer ' . $token]]);
-    }
-
-    /**
-     * Use other credentials if needed.
-     */
-    protected function getToken($body = []): string
-    {
-        if ($this->token) {
-            return $this->token;
-        }
-
-        $response = static::createClient()->request(
-            'POST',
-            self::URL_LOGIN,
-            [
-                'headers' => ['Content-Type' => 'application/json'],
-                'json' => $body ?: [
-                    'username' => self::USERNAME,
-                    'password' => self::PASSWORD,
-                ],
-            ]
-        );
-
-        $this->assertResponseIsSuccessful();
-        $data = $response->toArray();
-        $this->assertArrayHasKey('token', $data);
-        $this->token = $data['token'];
-
-        return $data['token'];
+        return static::createClient([], [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $this->token,
+            ],
+        ]);
     }
 }
