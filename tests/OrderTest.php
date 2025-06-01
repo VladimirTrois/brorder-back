@@ -489,7 +489,7 @@ class OrderTest extends AbstractTest
 
     function assertProductStockEqual($product, $stock)
     {
-        $responseStock = static::createClientWithCredentials()->request('GET', self::URL_PRODUCT . "/" . $product->getId());
+        static::createClientWithCredentials()->request('GET', self::URL_PRODUCT . "/" . $product->getId());
         $this->assertJsonContains([
             'name' => $product->getName(),
             'stock' => $stock

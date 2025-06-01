@@ -23,14 +23,14 @@ class OrderItems
     #[ORM\ManyToOne(targetEntity: Order::class, inversedBy: 'items')]
     #[ORM\JoinColumn(nullable: false)]
     #[Assert\NotNull]
-    private ?order $order;
+    private ?Order $order;
 
     #[ORM\ManyToOne(targetEntity: Product::class)]
     #[ORM\JoinColumn(nullable: false)]
     #[Groups(['order:collection:read', 'order:write'])]
     #[Assert\NotBlank]
     #[Assert\Type(Product::class)]
-    private ?product $product;
+    private ?Product $product;
 
     #[ORM\Column]
     #[Groups(['order:collection:read', 'order:write'])]
