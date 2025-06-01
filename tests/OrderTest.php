@@ -487,34 +487,6 @@ class OrderTest extends AbstractTest
         $this->assertProductStockEqual($product1, -1);
     }
 
-    // public function testDELETE(): void
-    // {
-    //     $order = OrderFactory::createOne();
-    //     $response = static::createClientWithCredentials()->request('DELETE', self::URL_ORDER . "/" . $order->getId());
-
-    //     $this->assertResponseIsSuccessful();
-
-    //     $response = static::createClientWithCredentials()->request('GET', self::URL_ORDER . "/" . $order->getId());
-    //     $this->assertResponseStatusCodeSame(301);
-    // }
-
-    // public function testNoAdmin(): void
-    // {
-    //     $order = OrderFactory::createOne();
-
-    //     $response = static::createClient()->request('GET', self::URL_ORDER  . "/" . $order->getId());
-    //     $this->assertResponseStatusCodeSame(401);
-
-    //     $response = static::createClient()->request('POST', self::URL_ORDER);
-    //     $this->assertResponseStatusCodeSame(401);
-
-    //     $response = static::createClient()->request('PATCH', self::URL_ORDER  . "/" . $order->getId());
-    //     $this->assertResponseStatusCodeSame(401);
-
-    //     $response = static::createClient()->request("DELETE", self::URL_ORDER  . "/" . $order->getId());
-    //     $this->assertResponseStatusCodeSame(401);
-    // }
-
     function assertProductStockEqual($product, $stock)
     {
         $responseStock = static::createClientWithCredentials()->request('GET', self::URL_PRODUCT . "/" . $product->getId());
