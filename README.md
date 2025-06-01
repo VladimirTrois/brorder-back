@@ -34,6 +34,7 @@ make composer c="require --dev foundry orm-fixtures"
 make composer c="require --dev symfony/test-pack symfony/http-client"
 make composer c="require --dev dama/doctrine-test-bundle"
 make composer c="require --dev justinrainbow/json-schema"
+make composer c="require --dev symfony/profiler-pack"
 ```
 
 ### On first time run

@@ -202,10 +202,11 @@ class Order
 
     public function setItems(Collection $items): static
     {
+        $this->items->clear();
         foreach ($items as $item) {
             $item->setOrder($this);
+            $this->addItem($item);
         }
-        $this->items = $items;
         return $this;
     }
 
