@@ -2,9 +2,11 @@
 
 namespace App\Tests;
 
+use ApiPlatform\Symfony\Bundle\Test\Client;
+use App\Entity\Product;
 use App\Factory\OrderFactory;
 use App\Factory\ProductFactory;
-
+use App\Repository\ProductRepository;
 
 class OrderTest extends AbstractTest
 {
@@ -14,11 +16,22 @@ class OrderTest extends AbstractTest
     public const URL_ORDER = self::URL_BASE . "/orders";
     public const URL_PRODUCT = self::URL_BASE . "/products";
 
+    private Product $product1;
+    private Product $product2;
+    private Client $clientWithCredentials;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+        $this->clientWithCredentials = static::createClientWithCredentials();
+        $this->product1 = ProductFactory::createOne(['stock' => 10]);
+        $this->product2 = ProductFactory::createOne(['stock' => 10]);
+    }
+
     public function testGetCollection(): void
     {
         OrderFactory::createMany(self::NUMBEROFORDERS);
-
-        $response = static::createClientWithCredentials()->request('GET', self::URL_ORDER);
+        $response = $this->clientWithCredentials->request('GET', self::URL_ORDER);
 
         $this->assertResponseIsSuccessful();
         $this->assertJsonContains(["totalItems" => self::NUMBEROFORDERS]);
@@ -27,16 +40,20 @@ class OrderTest extends AbstractTest
     public function testGET(): void
     {
         $order = OrderFactory::createOne();
-        $response = static::createClientWithCredentials()->request('GET', self::URL_ORDER . "/" . $order->getId());
+
+        $response = $this->clientWithCredentials->request('GET', self::URL_ORDER . "/" . $order->getId());
         $this->assertResponseIsSuccessful();
+        $this->assertJsonContains([
+            'id' => $order->getId(),
+            'name' => $order->getName()
+        ]);
     }
 
     public function testPOST(): void
     {
-        $product1 = ProductFactory::createOne(['stock' => 10]);
-        $product2 = ProductFactory::createOne(['stock' => 10]);
+        $client = static::createClient();
 
-        $response = static::createClient()->request('POST', self::URL_ORDER, [
+        $response = $client->request('POST', self::URL_ORDER, [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'testOrder',
@@ -44,11 +61,11 @@ class OrderTest extends AbstractTest
                 'pickUpDate' => "2024-11-23",
                 'items' => [
                     0 => [
-                        "product" => '/api/products/' . $product1->getId(),
+                        "product" => '/api/products/' . $this->product1->getId(),
                         "quantity" => 2,
                     ],
                     1 => [
-                        "product" => '/api/products/' . $product2->getId(),
+                        "product" => '/api/products/' . $this->product2->getId(),
                         "quantity" => 4,
                     ],
                 ],
@@ -67,16 +84,16 @@ class OrderTest extends AbstractTest
                 0 => [
                     '@type' => 'OrderItems',
                     "product" => [
-                        '@id' => '/api/products/' . $product1->getId(),
-                        "name" => $product1->getName(),
+                        '@id' => '/api/products/' . $this->product1->getId(),
+                        "name" => $this->product1->getName(),
                     ],
                     "quantity" => 2,
                 ],
                 1 => [
                     '@type' => 'OrderItems',
                     "product" => [
-                        '@id' => '/api/products/' . $product2->getId(),
-                        "name" => $product2->getName(),
+                        '@id' => '/api/products/' . $this->product2->getId(),
+                        "name" => $this->product2->getName(),
                     ],
                     "quantity" => 4,
                 ],
@@ -87,8 +104,9 @@ class OrderTest extends AbstractTest
 
     public function testPATCH(): void
     {
-        $product = ProductFactory::createOne(['stock' => 10]);
-        $responseOrder = static::createClient()->request('POST', self::URL_ORDER, [
+        $client = static::createClient();
+
+        $responseOrder = $client->request('POST', self::URL_ORDER, [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'testOrder',
@@ -96,14 +114,14 @@ class OrderTest extends AbstractTest
                 'pickUpDate' => "2024-11-23",
                 'items' => [
                     0 => [
-                        "product" => '/api/products/' . $product->getId(),
+                        "product" => '/api/products/' . $this->product1->getId(),
                         "quantity" => 2,
                     ]
                 ],
             ],
         ]);
 
-        $response = static::createClient()->request('PATCH', self::URL_ORDER . "/" . $responseOrder->toArray()['id'], [
+        $response = $client->request('PATCH', self::URL_ORDER . "/" . $responseOrder->toArray()['id'], [
             'headers' => ['Content-Type' => 'application/merge-patch+json'],
             'json' => [
                 'isTaken' => true,
@@ -114,10 +132,9 @@ class OrderTest extends AbstractTest
 
     public function testPOSTonOrder(): void
     {
-        $product1 = ProductFactory::createOne(['stock' => 10]);
-        $product2 = ProductFactory::createOne(['stock' => 10]);
+        $client = static::createClient();
 
-        $responseOrder = static::createClient()->request('POST', self::URL_ORDER, [
+        $responseOrder = $client->request('POST', self::URL_ORDER, [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'testOrder',
@@ -125,11 +142,11 @@ class OrderTest extends AbstractTest
                 'pickUpDate' => "2024-11-23",
                 'items' => [
                     0 => [
-                        "product" => '/api/products/' . $product1->getId(),
+                        "product" => '/api/products/' . $this->product1->getId(),
                         "quantity" => 4,
                     ],
                     1 => [
-                        "product" => '/api/products/' . $product2->getId(),
+                        "product" => '/api/products/' . $this->product2->getId(),
                         "quantity" => 2,
                     ]
                 ],
@@ -137,7 +154,7 @@ class OrderTest extends AbstractTest
         ]);
         $this->assertResponseStatusCodeSame(201);
 
-        $responseOrder = static::createClient()->request('POST', self::URL_ORDER, [
+        $responseOrder = $client->request('POST', self::URL_ORDER, [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'testOrder',
@@ -145,11 +162,11 @@ class OrderTest extends AbstractTest
                 'pickUpDate' => "2024-11-23",
                 'items' => [
                     0 => [
-                        "product" => '/api/products/' . $product1->getId(),
+                        "product" => '/api/products/' . $this->product1->getId(),
                         "quantity" => 1,
                     ],
                     1 => [
-                        "product" => '/api/products/' . $product2->getId(),
+                        "product" => '/api/products/' . $this->product2->getId(),
                         "quantity" => 5,
                     ]
                 ],
@@ -168,14 +185,14 @@ class OrderTest extends AbstractTest
                     0 => [
                         '@type' => 'OrderItems',
                         "product" => [
-                            "name" => $product1->getName(),
+                            "name" => $this->product1->getName(),
                         ],
                         "quantity" => 4,
                     ],
                     1 => [
                         '@type' => 'OrderItems',
                         "product" => [
-                            "name" => $product2->getName(),
+                            "name" => $this->product2->getName(),
                         ],
                         "quantity" => 2,
                     ],
@@ -188,8 +205,9 @@ class OrderTest extends AbstractTest
     {
         $product1 = ProductFactory::createOne(['stock' => 10]);
         $product2 = ProductFactory::createOne(['stock' => -1]);
+        $client = static::createClient();
 
-        $responseOrder = static::createClient()->request('POST', self::URL_ORDER, [
+        $responseOrder = $client->request('POST', self::URL_ORDER, [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'testOrder',
@@ -211,7 +229,7 @@ class OrderTest extends AbstractTest
         $this->assertProductStockEqual($product1, 6);
         $this->assertProductStockEqual($product2, -1);
 
-        static::createClient()->request('PATCH', self::URL_ORDER . "/" . $responseOrder->toArray()['id'], [
+        $client->request('PATCH', self::URL_ORDER . "/" . $responseOrder->toArray()['id'], [
             'headers' => ['Content-Type' => 'application/merge-patch+json'],
             'json' => [
                 'isDeleted' => true,
@@ -274,7 +292,8 @@ class OrderTest extends AbstractTest
     public function testStockOnPOST(): void
     {
         $product = ProductFactory::createOne(['stock' => 10]);
-        $responseOrder = static::createClientWithCredentials()->request('POST', self::URL_ORDER, [
+
+        $responseOrder = $this->clientWithCredentials->request('POST', self::URL_ORDER, [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'testOrder',
@@ -296,7 +315,8 @@ class OrderTest extends AbstractTest
     {
         $product1 = ProductFactory::createOne(['stock' => 10]);
         $product2 = ProductFactory::createOne(['stock' => 20]);
-        $responseOrder = static::createClientWithCredentials()->request('POST', self::URL_ORDER, [
+
+        $responseOrder = $this->clientWithCredentials->request('POST', self::URL_ORDER, [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'testOrder',
@@ -319,7 +339,7 @@ class OrderTest extends AbstractTest
         $this->assertProductStockEqual($product2, 10);
 
 
-        $responseOrderPatch = static::createClientWithCredentials()->request('PATCH', self::URL_ORDER . "/" . $responseOrder->toArray()['id'], [
+        $this->clientWithCredentials->request('PATCH', self::URL_ORDER . "/" . $responseOrder->toArray()['id'], [
             'headers' => ['Content-Type' => 'application/merge-patch+json'],
             'json' => [
                 'items' => [
@@ -344,7 +364,7 @@ class OrderTest extends AbstractTest
         $product1 = ProductFactory::createOne(['stock' => 10]);
         $product2 = ProductFactory::createOne(['stock' => 10]);
         $product3 = ProductFactory::createOne(['stock' => 10]);
-        $responseOrder = static::createClientWithCredentials()->request('POST', self::URL_ORDER, [
+        $responseOrder = $this->clientWithCredentials->request('POST', self::URL_ORDER, [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'testOrder',
@@ -368,7 +388,7 @@ class OrderTest extends AbstractTest
         $this->assertProductStockEqual($product3, 10);
 
 
-        $responseOrderPatch = static::createClientWithCredentials()->request('PATCH', self::URL_ORDER . "/" . $responseOrder->toArray()['id'], [
+        $this->clientWithCredentials->request('PATCH', self::URL_ORDER . "/" . $responseOrder->toArray()['id'], [
             'headers' => ['Content-Type' => 'application/merge-patch+json'],
             'json' => [
                 'items' => [
@@ -393,7 +413,7 @@ class OrderTest extends AbstractTest
     {
         $product1 = ProductFactory::createOne(['stock' => 10]);
         $product2 = ProductFactory::createOne(['stock' => 20]);
-        $responseOrder = static::createClientWithCredentials()->request('POST', self::URL_ORDER, [
+        $responseOrder = $this->clientWithCredentials->request('POST', self::URL_ORDER, [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'testOrder',
@@ -415,7 +435,7 @@ class OrderTest extends AbstractTest
         $this->assertProductStockEqual($product1, 6);
         $this->assertProductStockEqual($product2, 18);
 
-        static::createClientWithCredentials()->request('PATCH', self::URL_ORDER . "/" . $responseOrder->toArray()['id'], [
+        $this->clientWithCredentials->request('PATCH', self::URL_ORDER . "/" . $responseOrder->toArray()['id'], [
             'headers' => ['Content-Type' => 'application/merge-patch+json'],
             'json' => [
                 'isDeleted' => true,
@@ -427,7 +447,7 @@ class OrderTest extends AbstractTest
 
 
 
-        static::createClientWithCredentials()->request('PATCH', self::URL_ORDER . "/" . $responseOrder->toArray()['id'], [
+        $this->clientWithCredentials->request('PATCH', self::URL_ORDER . "/" . $responseOrder->toArray()['id'], [
             'headers' => ['Content-Type' => 'application/merge-patch+json'],
             'json' => [
                 'isDeleted' => true,
@@ -437,7 +457,7 @@ class OrderTest extends AbstractTest
         $this->assertProductStockEqual($product1, 10);
         $this->assertProductStockEqual($product2, 20);
 
-        static::createClientWithCredentials()->request('PATCH', self::URL_ORDER . "/" . $responseOrder->toArray()['id'], [
+        $this->clientWithCredentials->request('PATCH', self::URL_ORDER . "/" . $responseOrder->toArray()['id'], [
             'headers' => ['Content-Type' => 'application/merge-patch+json'],
             'json' => [
                 'isDeleted' => false,
@@ -450,8 +470,11 @@ class OrderTest extends AbstractTest
 
     public function testStockInfinity(): void
     {
+        //Set product to stock infinity
         $product1 = ProductFactory::createOne(['stock' => -1]);
-        $responseOrder = static::createClientWithCredentials()->request('POST', self::URL_ORDER, [
+
+        //Test by adding product to an order
+        $responseOrder = $this->clientWithCredentials->request('POST', self::URL_ORDER, [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'testOrder',
@@ -465,34 +488,32 @@ class OrderTest extends AbstractTest
                 ],
             ],
         ]);
-
         $this->assertProductStockEqual($product1, -1);
 
-        static::createClientWithCredentials()->request('PATCH', self::URL_ORDER . "/" . $responseOrder->toArray()['id'], [
+        //Test by deleting order
+        $this->clientWithCredentials->request('PATCH', self::URL_ORDER . "/" . $responseOrder->toArray()['id'], [
             'headers' => ['Content-Type' => 'application/merge-patch+json'],
             'json' => [
                 'isDeleted' => true,
             ],
         ]);
-
         $this->assertProductStockEqual($product1, -1);
 
-        static::createClientWithCredentials()->request('PATCH', self::URL_ORDER . "/" . $responseOrder->toArray()['id'], [
+        //Test by undeleting order
+        $this->clientWithCredentials->request('PATCH', self::URL_ORDER . "/" . $responseOrder->toArray()['id'], [
             'headers' => ['Content-Type' => 'application/merge-patch+json'],
             'json' => [
                 'isDeleted' => false,
             ],
         ]);
-
         $this->assertProductStockEqual($product1, -1);
     }
 
-    function assertProductStockEqual($product, $stock)
+    function assertProductStockEqual($product, $expectedStock)
     {
-        static::createClientWithCredentials()->request('GET', self::URL_PRODUCT . "/" . $product->getId());
-        $this->assertJsonContains([
-            'name' => $product->getName(),
-            'stock' => $stock
-        ]);
+        $repository = static::getContainer()->get(ProductRepository::class);
+        $refreshedProduct = $repository->find($product->getId());
+        $this->assertNotNull($refreshedProduct, "Product not found in database");
+        $this->assertSame($expectedStock, $refreshedProduct->getStock(), "Stock mismatch for product ID {$product->getId()}");
     }
 }
