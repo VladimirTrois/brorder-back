@@ -15,7 +15,7 @@ class ProductTest extends AbstractTest
     {
         ProductFactory::createMany(self::NUMBERSOFPRODUCTS);
 
-        $response = static::createClient()->request('GET', self::URL_PRODUCT);
+        $response = $this->createClient()->request('GET', self::URL_PRODUCT);
 
         $this->assertResponseIsSuccessful();
         $this->assertMatchesResourceCollectionJsonSchema(Product::class);
@@ -27,7 +27,7 @@ class ProductTest extends AbstractTest
         $allergy1 = AllergyFactory::createOne(['name' => 'B']);
         $allergy2 = AllergyFactory::createOne(['name' => 'A']);
 
-        $response = static::createClientWithCredentials()->request('POST', self::URL_PRODUCT, [
+        $response = $this->createClientWithCredentials(['roles' => ['ROLE_ADMIN']])->request('POST', self::URL_PRODUCT, [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'AAAAAAAAA',
@@ -49,7 +49,7 @@ class ProductTest extends AbstractTest
         ]);
         $this->assertResponseIsSuccessful();
 
-        $response = static::createClient()->request('GET', self::URL_PRODUCT . '/allergies');
+        $response = $this->createClient()->request('GET', self::URL_PRODUCT . '/allergies');
 
         $this->assertResponseIsSuccessful();
         $this->assertMatchesResourceCollectionJsonSchema(Product::class);
@@ -81,7 +81,7 @@ class ProductTest extends AbstractTest
     public function testGET(): void
     {
         $product = ProductFactory::createOne();
-        $response = static::createClientWithCredentials()->request('GET', self::URL_PRODUCT . "/" . $product->getId());
+        $response = $this->createClientWithCredentials(['roles' => ['ROLE_ADMIN']])->request('GET', self::URL_PRODUCT . "/" . $product->getId());
         $this->assertResponseIsSuccessful();
         $this->assertMatchesResourceItemJsonSchema(Product::class);
     }
@@ -91,7 +91,7 @@ class ProductTest extends AbstractTest
         $allergy1 = AllergyFactory::createOne();
         $allergy2 = AllergyFactory::createOne();
 
-        $response = static::createClientWithCredentials()->request('POST', self::URL_PRODUCT, [
+        $response = $this->createClientWithCredentials(['roles' => ['ROLE_ADMIN']])->request('POST', self::URL_PRODUCT, [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'productTest',
@@ -130,7 +130,7 @@ class ProductTest extends AbstractTest
     public function testPATCH(): void
     {
         $product = ProductFactory::createOne();
-        $response = static::createClientWithCredentials()->request('PATCH', self::URL_PRODUCT . "/" . $product->getId(), [
+        $response = $this->createClientWithCredentials(['roles' => ['ROLE_ADMIN']])->request('PATCH', self::URL_PRODUCT . "/" . $product->getId(), [
             'headers' => ['Content-Type' => 'application/merge-patch+json'],
             'json' => [
                 'username' => 'change',
@@ -156,11 +156,11 @@ class ProductTest extends AbstractTest
     // public function testDELETE(): void
     // {
     //     $product = ProductFactory::createOne();
-    //     $response = static::createClientWithCredentials()->request('DELETE', self::URL_PRODUCT . "/" . $product->getId());
+    //     $response = $this->createClientWithCredentials(['roles' => ['ROLE_ADMIN']])->request('DELETE', self::URL_PRODUCT . "/" . $product->getId());
 
     //     $this->assertResponseIsSuccessful();
 
-    //     $response = static::createClientWithCredentials()->request('GET', self::URL_PRODUCT . "/" . $product->getId());
+    //     $response = $this->createClientWithCredentials(['roles' => ['ROLE_ADMIN']])->request('GET', self::URL_PRODUCT . "/" . $product->getId());
     //     $this->assertResponseStatusCodeSame(404);
     // }
 }

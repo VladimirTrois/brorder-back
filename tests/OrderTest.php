@@ -23,7 +23,7 @@ class OrderTest extends AbstractTest
     public function setUp(): void
     {
         parent::setUp();
-        $this->clientWithCredentials = static::createClientWithCredentials();
+        $this->clientWithCredentials = $this->createClientWithCredentials(['roles' => ['ROLE_ADMIN']]);
         $this->product1 = ProductFactory::createOne(['stock' => 10]);
         $this->product2 = ProductFactory::createOne(['stock' => 10]);
     }
@@ -51,14 +51,14 @@ class OrderTest extends AbstractTest
 
     public function testPOST(): void
     {
-        $client = static::createClient();
+        $client = $this->createClient();
 
         $response = $client->request('POST', self::URL_ORDER, [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'testOrder',
                 'pitch' => "A23",
-                'pickUpDate' => "2024-11-23",
+                'pickUpDate' => (new \DateTime('+1 week'))->format('Y-m-d'),
                 'items' => [
                     0 => [
                         "product" => '/api/products/' . $this->product1->getId(),
@@ -79,7 +79,7 @@ class OrderTest extends AbstractTest
             '@type' => 'Order',
             'name' => 'testOrder',
             'pitch' => "A23",
-            'pickUpDate' => "2024-11-23",
+            'pickUpDate' => (new \DateTime('+1 week'))->format('Y-m-d'),
             'items' => [
                 0 => [
                     '@type' => 'OrderItems',
@@ -104,14 +104,14 @@ class OrderTest extends AbstractTest
 
     public function testPATCH(): void
     {
-        $client = static::createClient();
+        $client = $this->createClient();
 
         $responseOrder = $client->request('POST', self::URL_ORDER, [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'testOrder',
                 'pitch' => "A23",
-                'pickUpDate' => "2024-11-23",
+                'pickUpDate' => (new \DateTime('+1 week'))->format('Y-m-d'),
                 'items' => [
                     0 => [
                         "product" => '/api/products/' . $this->product1->getId(),
@@ -132,14 +132,14 @@ class OrderTest extends AbstractTest
 
     public function testPOSTonOrder(): void
     {
-        $client = static::createClient();
+        $client = $this->createClient();
 
         $responseOrder = $client->request('POST', self::URL_ORDER, [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'testOrder',
                 'pitch' => "A23",
-                'pickUpDate' => "2024-11-23",
+                'pickUpDate' => (new \DateTime('+1 week'))->format('Y-m-d'),
                 'items' => [
                     0 => [
                         "product" => '/api/products/' . $this->product1->getId(),
@@ -159,7 +159,7 @@ class OrderTest extends AbstractTest
             'json' => [
                 'name' => 'testOrder',
                 'pitch' => "A23",
-                'pickUpDate' => "2024-11-23",
+                'pickUpDate' => (new \DateTime('+1 week'))->format('Y-m-d'),
                 'items' => [
                     0 => [
                         "product" => '/api/products/' . $this->product1->getId(),
@@ -180,7 +180,7 @@ class OrderTest extends AbstractTest
                 '@type' => 'Order',
                 'name' => 'testOrder',
                 'pitch' => "A23",
-                'pickUpDate' => "2024-11-23",
+                'pickUpDate' => (new \DateTime('+1 week'))->format('Y-m-d'),
                 'items' => [
                     0 => [
                         '@type' => 'OrderItems',
@@ -205,14 +205,14 @@ class OrderTest extends AbstractTest
     {
         $product1 = ProductFactory::createOne(['stock' => 10]);
         $product2 = ProductFactory::createOne(['stock' => -1]);
-        $client = static::createClient();
+        $client = $this->createClient();
 
         $responseOrder = $client->request('POST', self::URL_ORDER, [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'testOrder',
                 'pitch' => "A23",
-                'pickUpDate' => "2024-11-23",
+                'pickUpDate' => (new \DateTime('+1 week'))->format('Y-m-d'),
                 'items' => [
                     0 => [
                         "product" => '/api/products/' . $product1->getId(),
@@ -239,12 +239,12 @@ class OrderTest extends AbstractTest
         $this->assertProductStockEqual($product1, 10);
         $this->assertProductStockEqual($product2, -1);
 
-        $responseOrder = static::createClient()->request('POST', self::URL_ORDER, [
+        $responseOrder = $this->createClient()->request('POST', self::URL_ORDER, [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'testOrder',
                 'pitch' => "A23",
-                'pickUpDate' => "2024-11-23",
+                'pickUpDate' => (new \DateTime('+1 week'))->format('Y-m-d'),
                 'items' => [
                     0 => [
                         "product" => '/api/products/' . $product1->getId(),
@@ -264,7 +264,7 @@ class OrderTest extends AbstractTest
             '@type' => 'Order',
             'name' => 'testOrder',
             'pitch' => "A23",
-            'pickUpDate' => "2024-11-23",
+            'pickUpDate' => (new \DateTime('+1 week'))->format('Y-m-d'),
             'items' => [
                 0 => [
                     '@type' => 'OrderItems',
@@ -298,7 +298,7 @@ class OrderTest extends AbstractTest
             'json' => [
                 'name' => 'testOrder',
                 'pitch' => "A23",
-                'pickUpDate' => "2024-11-23",
+                'pickUpDate' => (new \DateTime('+1 week'))->format('Y-m-d'),
                 'items' => [
                     0 => [
                         "product" => '/api/products/' . $product->getId(),
@@ -321,7 +321,7 @@ class OrderTest extends AbstractTest
             'json' => [
                 'name' => 'testOrder',
                 'pitch' => "A23",
-                'pickUpDate' => "2024-11-23",
+                'pickUpDate' => (new \DateTime('+1 week'))->format('Y-m-d'),
                 'items' => [
                     0 => [
                         "product" => '/api/products/' . $product1->getId(),
@@ -369,7 +369,7 @@ class OrderTest extends AbstractTest
             'json' => [
                 'name' => 'testOrder',
                 'pitch' => "A23",
-                'pickUpDate' => "2024-11-23",
+                'pickUpDate' => (new \DateTime('+1 week'))->format('Y-m-d'),
                 'items' => [
                     0 => [
                         "product" => '/api/products/' . $product1->getId(),
@@ -418,7 +418,7 @@ class OrderTest extends AbstractTest
             'json' => [
                 'name' => 'testOrder',
                 'pitch' => "A23",
-                'pickUpDate' => "2024-11-23",
+                'pickUpDate' => (new \DateTime('+1 week'))->format('Y-m-d'),
                 'items' => [
                     0 => [
                         "product" => '/api/products/' . $product1->getId(),
@@ -479,7 +479,7 @@ class OrderTest extends AbstractTest
             'json' => [
                 'name' => 'testOrder',
                 'pitch' => "A23",
-                'pickUpDate' => "2024-11-23",
+                'pickUpDate' => (new \DateTime('+1 week'))->format('Y-m-d'),
                 'items' => [
                     0 => [
                         "product" => '/api/products/' . $product1->getId(),

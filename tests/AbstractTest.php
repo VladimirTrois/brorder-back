@@ -19,29 +19,20 @@ abstract class AbstractTest extends ApiTestCase
     use ResetDatabase, Factories;
 
     private ?string $token = null;
-    protected JWTTokenManagerInterface $jwtManager;
 
-    public function setUp(): void
+    protected function createClientWithCredentials(array $userData = []): Client
     {
-        self::bootKernel();
+        $user = UserFactory::createOne(array_merge([
+            'username' => 'test_user',
+            'password' => 'test_pass',
+            'roles' => ['ROLE_USER'],
+        ], $userData));
 
-        $this->jwtManager = self::getContainer()->get(JWTTokenManagerInterface::class);
+        $jwtManager = self::getContainer()->get(JWTTokenManagerInterface::class);
+        $token = $jwtManager->create($user);
 
-        $user = UserFactory::createOne([
-            'username' => self::USERNAME,
-            'password' => self::PASSWORD,
-            'roles' => ['ROLE_ADMIN'],
-        ]);
-
-        $this->token = $this->jwtManager->create($user);
-    }
-
-    protected function createClientWithCredentials($token = null): Client
-    {
         return static::createClient([], [
-            'headers' => [
-                'Authorization' => 'Bearer ' . $this->token,
-            ],
+            'headers' => ['Authorization' => 'Bearer ' . $token],
         ]);
     }
 }

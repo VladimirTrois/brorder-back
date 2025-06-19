@@ -22,7 +22,7 @@ class AllergyTest extends AbstractTest
 
     public function testPOST(): void
     {
-        $response = static::createClientWithCredentials()->request('POST', self::URL_ALLERGY, [
+        $response = $this->createClientWithCredentials(['roles' => ['ROLE_ADMIN']])->request('POST', self::URL_ALLERGY, [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'name' => 'Gluten',
@@ -43,7 +43,7 @@ class AllergyTest extends AbstractTest
     {
         $allergy = AllergyFactory::createOne();
 
-        $response = static::createClientWithCredentials()->request('PATCH', self::URL_ALLERGY . "/" . $allergy->getId(), [
+        $response = $this->createClientWithCredentials(['roles' => ['ROLE_ADMIN']])->request('PATCH', self::URL_ALLERGY . "/" . $allergy->getId(), [
             'headers' => ['Content-Type' => 'application/merge-patch+json'],
             'json' => [
                 'name' => "NewAllergyName",
@@ -56,7 +56,7 @@ class AllergyTest extends AbstractTest
     {
         $allergy = AllergyFactory::createOne();
 
-        $response = static::createClientWithCredentials()->request('DELETE', self::URL_ALLERGY . "/" . $allergy->getId());
+        $response = $this->createClientWithCredentials(['roles' => ['ROLE_ADMIN']])->request('DELETE', self::URL_ALLERGY . "/" . $allergy->getId());
 
         $this->assertResponseIsSuccessful();
         $this->assertResponseStatusCodeSame(204);

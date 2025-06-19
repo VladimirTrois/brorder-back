@@ -11,13 +11,13 @@ class UserTest extends AbstractTest
 
     public function testAdminLogin()
     {
-        $response = static::createClientWithCredentials()->request('GET', self::URL_USER);
+        $response = $this->createClientWithCredentials(['roles' => ['ROLE_ADMIN']])->request('GET', self::URL_USER);
         $this->assertResponseIsSuccessful();
     }
 
     public function testGetCollection(): void
     {
-        $response = static::createClientWithCredentials()->request('GET', self::URL_USER);
+        $response = $this->createClientWithCredentials(['roles' => ['ROLE_ADMIN']])->request('GET', self::URL_USER);
         $this->assertResponseIsSuccessful();
         $this->assertMatchesResourceCollectionJsonSchema(User::class);
     }
@@ -25,14 +25,14 @@ class UserTest extends AbstractTest
     public function testGET(): void
     {
         $user = UserFactory::createOne();
-        $response = static::createClientWithCredentials()->request('GET', self::URL_USER . "/" . $user->getId());
+        $response = $this->createClientWithCredentials(['roles' => ['ROLE_ADMIN']])->request('GET', self::URL_USER . "/" . $user->getId());
         $this->assertResponseIsSuccessful();
         $this->assertMatchesResourceItemJsonSchema(User::class);
     }
 
     public function testPOST(): void
     {
-        $response = static::createClientWithCredentials()->request('POST', self::URL_USER, [
+        $response = $this->createClientWithCredentials(['roles' => ['ROLE_ADMIN']])->request('POST', self::URL_USER, [
             'headers' => ['Content-Type' => 'application/ld+json'],
             'json' => [
                 'username' => 'testUser',
@@ -55,7 +55,7 @@ class UserTest extends AbstractTest
     public function testPATCH(): void
     {
         $user = UserFactory::createOne();
-        $response = static::createClientWithCredentials()->request('PATCH', self::URL_USER . "/" . $user->getId(), [
+        $response = $this->createClientWithCredentials(['roles' => ['ROLE_ADMIN']])->request('PATCH', self::URL_USER . "/" . $user->getId(), [
             'headers' => ['Content-Type' => 'application/merge-patch+json'],
             'json' => [
                 'username' => 'changeg',
@@ -67,7 +67,7 @@ class UserTest extends AbstractTest
     public function testDELETE(): void
     {
         $user = UserFactory::createOne();
-        $response = static::createClientWithCredentials()->request('DELETE', self::URL_USER . "/" . $user->getId());
+        $response = $this->createClientWithCredentials(['roles' => ['ROLE_ADMIN']])->request('DELETE', self::URL_USER . "/" . $user->getId());
 
         $this->assertResponseIsSuccessful();
     }
