@@ -10,11 +10,12 @@ use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 
-class AppFixturesReal extends Fixture implements FixtureGroupInterface
+class AppFixturesAppend extends Fixture implements FixtureGroupInterface
 {
 
     const NUMBEROFORDERS = 300; //How many Orders to create
     const NUMBEROFITEMPERORDERMAX = 3; //How many Items per Order MAX to create 
+    const NUMBERSOFDAYS = 100;
 
     //Creates real fixtures
     public const REALPRODUCTS = [
@@ -26,14 +27,6 @@ class AppFixturesReal extends Fixture implements FixtureGroupInterface
 
     ];
 
-    public const REALALLERGIES = [
-        "Gluten",
-        "Oeufs/Eggs",
-        "Lait/Milk",
-        "Soja",
-        "Graines de sésame"
-    ];
-
     public function load(ObjectManager $manager): void
     {
         UserFactory::findOrCreate([
@@ -41,37 +34,29 @@ class AppFixturesReal extends Fixture implements FixtureGroupInterface
         ])->setPassword('password') 
         ->setRoles(['ROLE_ADMIN']);
 
-        $allergies = AllergyFactory::createMany(
-            count(SELF::REALALLERGIES),
-            static function (int $i) {
-                return [
-                    'name' => SELF::REALALLERGIES[$i - 1]
-                ];
-            }
-        );
+        $products = array();
 
-        $products = ProductFactory::createMany(
-            count(SELF::REALPRODUCTS),
-            static function (int $i) {
-                return [
-                    'name' => SELF::REALPRODUCTS[$i - 1][0],
-                    'price' => SELF::REALPRODUCTS[$i - 1][1],
-                    'weight' => SELF::REALPRODUCTS[$i - 1][2],
-                    'image' => SELF::REALPRODUCTS[$i - 1][3],
-                    'rank' => self::REALPRODUCTS[$i - 1][4],
+        foreach(SELF::REALPRODUCTS as $product){
+            $products[] = ProductFactory::findOrCreate(
+                [
+                    'name' => $product[0],
+                    'price' => $product[1],
+                    'weight' => $product[2],
+                    'image' => $product[3],
+                    'rank' => $product[4],
                     'stock' => 10,
                     'isAvailable' => true,
-                ];
-            }
-        );
+                ]
+            );
+        }
 
         //Create orders with items
-        $orders = OrderFactory::createOrderWithItemsForToday($products, self::NUMBEROFORDERS, self::NUMBEROFITEMPERORDERMAX);
+        OrderFactory::createOrderWithItemsForTheNextXDay($products, self::NUMBEROFORDERS, self::NUMBEROFITEMPERORDERMAX,self::NUMBERSOFDAYS);
         $manager->flush();
     }
 
     public static function getGroups(): array
     {
-        return ['real'];
+        return ['append'];
     }
 }

@@ -70,11 +70,11 @@ createDB: sf
 migrateDB: c=doctrine:migrations:migrate
 migrateDB: sf 
 
-loadAll: c=doctrine:fixtures:load
-loadAll: sf 
-
 loadRandomDB: c=doctrine:fixtures:load --group=random
 loadRandomDB: sf 
 
 loadRealDB: c=doctrine:fixtures:load --group=real
 loadRealDB: sf
+
+loadMoreDB: c=doctrine:fixtures:load --group=append --append
+loadMoreDB: sf

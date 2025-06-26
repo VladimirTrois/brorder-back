@@ -29,12 +29,14 @@ final class OrderFactory extends PersistentProxyObjectFactory
      */
     protected function defaults(): array|callable
     {
+        $faker = self::faker();
+
         return [
-            'name' => strtolower(self::faker()->lastName()),
-            'pitch' => self::faker()->randomLetter() . self::faker()->numberBetween(0, 1) . self::faker()->numberBetween(0, 9),
-            'pickUpDate' => self::faker()->dateTimeBetween('-0 days', '+0 days'),
-            'isDeleted' => self::faker()->boolean(10),
-            'isTaken' => self::faker()->boolean(10),
+            'name' => strtolower($faker->lastName()),
+            'pitch' => $faker->randomLetter() . $faker->numberBetween(0, 1) . $faker->numberBetween(0, 9),
+            'pickUpDate' => $faker->dateTimeBetween('-0 days', '+0 days'),
+            'isDeleted' => $faker->boolean(10),
+            'isTaken' => $faker->boolean(10),
         ];
     }
 
@@ -52,34 +54,8 @@ final class OrderFactory extends PersistentProxyObjectFactory
     {
         $orders = self::createMany($numberOfOrders);
 
-        foreach ($orders as $order) {
-            $order->setTotal(0);
-            $nbOfItems = rand(1, $nbOfItemsPerOrderMax);
-            $selectedKeys = array_rand($products, $nbOfItems);
-            if ($nbOfItems == 1) {
-                OrderItemsFactory::createOne(
-                    [
-                        'order' => $order,
-                        'product' => $products[$selectedKeys],
-                        'quantity' => rand(1, 10),
+        self::addItemsToOrders($orders,$products,$nbOfItemsPerOrderMax);
 
-                    ]
-                );
-                $order->setTotal($order->getTotal() + $products[$selectedKeys]['price']);
-            } else {
-                foreach ($selectedKeys as $key) {
-                    OrderItemsFactory::createOne(
-                        [
-                            'order' => $order,
-                            'product' => $products[$key],
-                            'quantity' => rand(1, 10),
-
-                        ]
-                    );
-                    $order->setTotal($order->getTotal() + $products[$key]['price']);
-                }
-            }
-        };
         return $orders;
     }
 
@@ -92,36 +68,43 @@ final class OrderFactory extends PersistentProxyObjectFactory
             }
         );
 
+        self::addItemsToOrders($orders,$products,$nbOfItemsPerOrderMax);
+
+        return $orders;
+    }
+
+    final public static function createOrderWithItemsForTheNextXDay(array $products, $numberOfOrders, $nbOfItemsPerOrderMax, $numberOfDays): array
+    {
+        $orders = self::createMany(
+            $numberOfOrders,
+            static function (int $i) use ($numberOfDays) {
+                return ['pickUpDate' => self::faker()->dateTimeBetween('-1 days', "+$numberOfDays days")];
+            }
+        );
+
+        self::addItemsToOrders($orders,$products,$nbOfItemsPerOrderMax);
+
+        return $orders;
+    }
+
+    private static function addItemsToOrders(array $orders,array $products,$nbOfItemsPerOrderMax){
         foreach ($orders as $order) {
             $total = 0;
             $nbOfItems = rand(1, $nbOfItemsPerOrderMax);
-            $selectedKeys = array_rand($products, $nbOfItems);
-            if ($nbOfItems == 1) {
+            $selectedKeys = (array) array_rand($products, $nbOfItems);
+            foreach ($selectedKeys as $key) {
                 $quantity = rand(1, 5);
                 OrderItemsFactory::createOne(
                     [
                         'order' => $order,
-                        'product' => $products[$selectedKeys],
+                        'product' => $products[$key],
                         'quantity' => $quantity,
+
                     ]
                 );
-                $total += $products[$selectedKeys]->getPrice() * $quantity;
-            } else {
-                foreach ($selectedKeys as $key) {
-                    $quantity = rand(1, 5);
-                    OrderItemsFactory::createOne(
-                        [
-                            'order' => $order,
-                            'product' => $products[$key],
-                            'quantity' => $quantity,
-
-                        ]
-                    );
-                    $total += $products[$key]->getPrice() * $quantity;
-                }
+                $total += $products[$key]->getPrice() * $quantity;
             }
             $order->setTotal($total);
         };
-        return $orders;
     }
 }
