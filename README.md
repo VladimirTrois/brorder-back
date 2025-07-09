@@ -4,11 +4,11 @@
 
 ## Informations
 
-Partie back de Brorder une application de gestion de commande. 
+Partie back d'une application de gestion de commande. 
 Cette application est réalisé pour un camping afin que les clients puissent commander du pain la veille pour le lendemain.
-Le camping doit ensuite pouvoir gérer ses produits et les commandes.
+Le camping doit ensuite pouvoir gérer les produits et les commandes.
 
-L'application tourne avec docker et API platform sur symfony.
+Le back utilise Docker et API platform sur Symfony.
 
 ## Getting Started
 
@@ -17,25 +17,6 @@ L'application tourne avec docker et API platform sur symfony.
 3. Run `make up` to set up and start
 4. Open SERVER_NAME address
 5. Run `make down` to stop the Docker containers.
-
-## What was used :
-
-### All the different packages
-```
-make composer c='require symfony/orm-pack'
-make composer c='require api'
-make composer c='require lexik/jwt-authentication-bundle'
-make composer c="require symfony/serializer-pack"
-make composer c="require gesdinet/jwt-refresh-token-bundle"
-make composer c="require doctrine/doctrine-migrations-bundle"
-
-make composer c='require --dev symfony/maker-bundle'
-make composer c="require --dev foundry orm-fixtures"
-make composer c="require --dev symfony/test-pack symfony/http-client"
-make composer c="require --dev dama/doctrine-test-bundle"
-make composer c="require --dev justinrainbow/json-schema"
-make composer c="require --dev symfony/profiler-pack"
-```
 
 ### On first time run
 ```
@@ -67,16 +48,6 @@ APP_SECRET=ChangeMe \
 CADDY_MERCURE_JWT_SECRET=ChangeThisMercureHubJWTSecretKey \
 docker compose -f compose.yaml -f compose.prod.yaml up -d --wait
 ```
-
-### All must have composer packages
-```
-make composer c='req symfony/orm-pack'
-make composer c='require api'
-make composer c='require lexik/jwt-authentication-bundle'
-make composer c='require symfony/serializer-pack'
-make composer c='require gesdinet/jwt-refresh-token-bundle'
-```
-
 
 ## Checklist
 ```
@@ -160,4 +131,23 @@ curl -X 'DELETE' \
   'SERVER_NAME:PORT/api/users/{id}' \
   -H 'accept: */*' \
   -H 'Authorization: Bearer token'
+```
+
+## What was used :
+
+### All the different packages
+```
+make composer c='require symfony/orm-pack'
+make composer c='require api'
+make composer c='require lexik/jwt-authentication-bundle'
+make composer c="require symfony/serializer-pack"
+make composer c="require gesdinet/jwt-refresh-token-bundle"
+make composer c="require doctrine/doctrine-migrations-bundle"
+
+make composer c='require --dev symfony/maker-bundle'
+make composer c="require --dev foundry orm-fixtures"
+make composer c="require --dev symfony/test-pack symfony/http-client"
+make composer c="require --dev dama/doctrine-test-bundle"
+make composer c="require --dev justinrainbow/json-schema"
+make composer c="require --dev symfony/profiler-pack"
 ```
